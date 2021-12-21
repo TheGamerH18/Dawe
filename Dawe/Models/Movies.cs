@@ -9,7 +9,7 @@ namespace Dawe.Models
         [Key]
         public int Id { get; set; }
         public string MoviePath { get; set; } = string.Empty;
-        public byte[] Cover { get; set; } = null;
+        public byte[] Cover { get; set; }
         public string Name { get; set; } = string.Empty;
 
         public List<string> Tags { get; } = new();
