@@ -42,6 +42,14 @@
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
+        <form id="form" name="form" action="/Movies/Upload" enctype="multipart/form-data" method="post">
+          <div class="buttons">
+            <div class="upload-button">
+              <div class="label">Click me!</div>
+              <input id="files" name="files" type="file" size="1" onchange="uploadFiles('files');" />
+            </div>
+          </div>
+        </form>
     </div>
 </div>
 
@@ -51,4 +59,28 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function uploadFiles(inputId) {
+            var input = document.getElementById(inputId);
+            var files = input.files;
+            var formData = new FormData();
+
+                formData.append("files", files[0]);
+
+
+            $.ajax(
+            {
+                url: "/Movies/Upload",
+                data: formData,
+                processData: false,
+                contentType: false,
+                type: "POST",
+                success: function (data) {
+                alert("Files Uploaded!");
+                }
+            }
+            );
+        }
+    </script>
 }

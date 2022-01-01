@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Dawe.Models;
+using Microsoft.Net.Http.Headers;
 
 namespace Dawe.Controllers
 {
     public class MoviesController : Controller
     {
         private readonly Data.DataContext _context;
+        private readonly IWebHostEnvironment _hostingEnvironment; 
 
-        public MoviesController(Data.DataContext context)
+        public MoviesController(Data.DataContext context, IWebHostEnvironment hostingEnvironment)
         {
             _context = context;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         // GET: Movies
@@ -63,6 +66,36 @@ namespace Dawe.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(movies);
+        }
+
+        // Post: Movies/Upload
+        [HttpPost]
+        [DisableRequestSizeLimit,
+        RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue,
+        ValueLengthLimit = int.MaxValue)]
+        public async Task<IActionResult> Upload(IFormFile files)
+        {
+            string filename = Path.GetTempFileName();
+
+            filename = EnsureCorrectFilename(filename);
+
+            using (FileStream output = System.IO.File.Create(GetPathAndFilename(filename)))
+                await files.CopyToAsync(output);
+
+            return Ok();
+        }
+
+        private string EnsureCorrectFilename(string filename)
+        {
+            if (filename.Contains("\\"))
+                filename = filename.Substring(filename.LastIndexOf("\\") + 1);
+
+            return filename;
+        }
+
+        private string GetPathAndFilename(string filename)
+        {
+            return _hostingEnvironment.WebRootPath + "\\uploads\\" + filename;
         }
 
         // GET: Movies/Edit/5
