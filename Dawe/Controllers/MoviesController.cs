@@ -15,11 +15,13 @@ namespace Dawe.Controllers
     {
         private readonly Data.DataContext _context;
         private readonly IWebHostEnvironment _hostingEnvironment; 
+        private readonly ILogger<MoviesController> _logger;
 
-        public MoviesController(Data.DataContext context, IWebHostEnvironment hostingEnvironment)
+        public MoviesController(Data.DataContext context, IWebHostEnvironment hostingEnvironment, ILogger<MoviesController> logger)
         {
             _context = context;
             _hostingEnvironment = hostingEnvironment;
+            _logger = logger;
         }
 
         // GET: Movies
@@ -75,27 +77,28 @@ namespace Dawe.Controllers
         ValueLengthLimit = int.MaxValue)]
         public async Task<IActionResult> Upload(IFormFile files)
         {
-            string filename = Path.GetTempFileName();
+            if(!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName))) return BadRequest();
+            string filename = createFilename(Path.GetExtension(files.FileName));
 
-            filename = EnsureCorrectFilename(filename);
-
-            using (FileStream output = System.IO.File.Create(GetPathAndFilename(filename)))
+            string path = GetPathAndFilename(filename);
+            _logger.LogInformation(path);
+            using (FileStream output = System.IO.File.Create(path))
                 await files.CopyToAsync(output);
 
-            return Ok();
+            return Ok(path);
         }
 
-        private string EnsureCorrectFilename(string filename)
+        private string createFilename(string fileextension)
         {
-            if (filename.Contains("\\"))
-                filename = filename.Substring(filename.LastIndexOf("\\") + 1);
-
-            return filename;
+            return $@"{Guid.NewGuid()}{fileextension}"; ;
         }
 
         private string GetPathAndFilename(string filename)
         {
-            return _hostingEnvironment.WebRootPath + "\\uploads\\" + filename;
+            string subfolder = "uploads/";
+            // return _hostingEnvironment.WebRootPath + "\\uploads\\" + filename;
+            string path = Path.Combine(_hostingEnvironment.WebRootPath, subfolder);
+            return Path.Combine(path, filename);
         }
 
         // GET: Movies/Edit/5
