@@ -1,5 +1,6 @@
 ﻿using SixLabors.ImageSharp;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace Dawe.Models
@@ -9,11 +10,12 @@ namespace Dawe.Models
         [Key]
         public int Id { get; set; }
         public string MoviePath { get; set; } = string.Empty;
+
         public byte[] Cover { get; set; }
         public string Name { get; set; } = string.Empty;
 
         public List<string> Tags { get; } = new();
 
-        public DateTime ReleaseDate { get; set; }
+        public string ReleaseDate { get; set; }
     }
 }
