@@ -7,7 +7,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<Dawe.Data.DataContext>();
 
 var app = builder.Build();
-
+app.Urls.Add("https://*:7167");
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
