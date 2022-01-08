@@ -59,40 +59,66 @@ namespace Dawe.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,MoviePath,Cover,Name,Tags,ReleaseDate")] Movies movies)
+        public async Task<IActionResult> Create(UploadModel upload)
         {
+            if(ModelState.IsValid)
+            {
+                using MemoryStream memoryStream = new MemoryStream();
+                await upload.CoverFile.CopyToAsync(memoryStream);
+                _logger.LogInformation(upload.MoviePath);
+                var movie = new Movies()
+                {
+                    Name = upload.Name,
+                    MoviePath = upload.MoviePath,
+                    ReleaseDate = upload.Date,
+                    Cover = memoryStream.ToArray(),
+                };
+                movie.Tags.AddRange(upload.Tags.Split(","));
+                _context.Add(movie);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(upload);
+            /*
             if (ModelState.IsValid)
             {
                 _context.Add(movies);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(movies);
+            return View(movies); */
         }
 
         // Post: Movies/Upload
+        // Unlimited File Size
         [HttpPost]
         [DisableRequestSizeLimit,
         RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue,
         ValueLengthLimit = int.MaxValue)]
         public async Task<IActionResult> Upload(IFormFile files)
         {
+            // Validate Extension
             if(!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName))) return BadRequest();
+            // Create file name
             string filename = createFilename(Path.GetExtension(files.FileName));
 
+            // Create Path
             string path = GetPathAndFilename(filename);
             _logger.LogInformation(path);
+            // Save File
             using (FileStream output = System.IO.File.Create(path))
                 await files.CopyToAsync(output);
 
-            return Ok(path);
+            return Ok(filename);
         }
 
+        // Create Unique File name and keeping the File extension
         private string createFilename(string fileextension)
         {
             return $@"{Guid.NewGuid()}{fileextension}"; ;
         }
 
+        // Create Full Path to File
         private string GetPathAndFilename(string filename)
         {
             string subfolder = "uploads/";
@@ -185,5 +211,15 @@ namespace Dawe.Controllers
         {
             return _context.Movies.Any(e => e.Id == id);
         }
+    }
+
+    public class UploadModel
+    {
+        [BindProperty]
+        public IFormFile CoverFile { get; set; }
+        public string MoviePath { get; set; }
+        public string Name { get; set; }
+        public string Tags  { get; set; }
+        public string Date { get; set; }
     }
 }
