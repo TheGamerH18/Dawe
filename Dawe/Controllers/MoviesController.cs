@@ -64,7 +64,7 @@ namespace Dawe.Controllers
             if(ModelState.IsValid)
             {
                 using MemoryStream memoryStream = new MemoryStream();
-                await upload.CoverFile.CopyToAsync(memoryStream);
+                    await upload.CoverFile.CopyToAsync(memoryStream);
                 _logger.LogInformation(upload.MoviePath);
                 var movie = new Movies()
                 {
@@ -98,7 +98,10 @@ namespace Dawe.Controllers
         public async Task<IActionResult> Upload(IFormFile files)
         {
             // Validate Extension
-            if(!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName))) return BadRequest();
+            if(!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName)))
+            {
+                return BadRequest();
+            }
             // Create file name
             string filename = createFilename(Path.GetExtension(files.FileName));
 

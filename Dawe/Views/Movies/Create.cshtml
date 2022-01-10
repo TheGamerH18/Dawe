@@ -42,12 +42,12 @@
             </div>
         </form>
         <form id="form" name="form" action="/Movies/Upload" enctype="multipart/form-data" method="post">
-          <div class="buttons">
-            <div class="upload-button">
-              <div class="label">Click me!</div>
-              <input id="files" name="files" type="file" size="1" onchange="uploadFiles('files');" />
+            <div class="form-group">
+              <input id="files" class="form-control" name="files" type="file" size="1" onchange="uploadFiles('files');" />
             </div>
-          </div>
+            <div class="progress">
+                <div id="uploadprogress" class="progress-bar" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
         </form>
     </div>
 </div>
@@ -70,15 +70,27 @@
 
             $.ajax(
             {
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function(event) {
+                        if(event.lengthComputable) {
+                            var percentComplete = event.loaded / event.total * 100;
+                            console.log(percentComplete);
+                            $('#uploadprogress').width(percentComplete+'%').attr('aria-valuenow', percentComplete);
+
+                        }
+                    });
+                    return xhr;
+                },
                 url: "/Movies/Upload",
                 data: formData,
                 processData: false,
                 contentType: false,
                 type: "POST",
                 success: function (data) {
-                alert("Files Uploaded!");
-                console.log(data);
-                $("#MoviePath").val(data);
+                    alert("Files Uploaded!");
+                    console.log(data);
+                    $("#MoviePath").val(data);
                 }
             }
             );
