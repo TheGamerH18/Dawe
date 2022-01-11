@@ -77,7 +77,6 @@
                             var percentComplete = event.loaded / event.total * 100;
                             console.log(percentComplete);
                             $('#uploadprogress').width(percentComplete+'%').attr('aria-valuenow', percentComplete);
-
                         }
                     });
                     return xhr;
