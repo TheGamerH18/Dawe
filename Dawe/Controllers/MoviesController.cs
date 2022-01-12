@@ -206,6 +206,7 @@ namespace Dawe.Controllers
             var movies = await _context.Movies.FindAsync(id);
             _context.Movies.Remove(movies);
             await _context.SaveChangesAsync();
+            System.IO.File.Delete(GetPathAndFilename(movies.MoviePath));
             return RedirectToAction(nameof(Index));
         }
 
