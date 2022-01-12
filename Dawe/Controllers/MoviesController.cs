@@ -1,13 +1,9 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Dawe.Models;
-using Microsoft.Net.Http.Headers;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace Dawe.Controllers
 {
@@ -63,9 +59,18 @@ namespace Dawe.Controllers
         {
             if(ModelState.IsValid)
             {
+                // Resize Cover
+                Image img = Image.Load(upload.CoverFile.OpenReadStream());
+                img.Mutate(x => x.Resize(new ResizeOptions()
+                {
+                    Mode = ResizeMode.BoxPad,
+                    Size = new Size(300, 450)
+                }));
+                // Copy Cover to Stream
                 using MemoryStream memoryStream = new MemoryStream();
-                    await upload.CoverFile.CopyToAsync(memoryStream);
+                    img.SaveAsPng(memoryStream);
                 _logger.LogInformation(upload.MoviePath);
+                // Save to model
                 var movie = new Movies()
                 {
                     Name = upload.Name,
@@ -73,20 +78,14 @@ namespace Dawe.Controllers
                     ReleaseDate = upload.Date,
                     Cover = memoryStream.ToArray(),
                 };
-                movie.Tags.AddRange(upload.Tags.Split(","));
+                var split = upload.Tags.Split(',');
+                var list = split.ToList();
+                movie.Tags.AddRange(list);
                 _context.Add(movie);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(upload);
-            /*
-            if (ModelState.IsValid)
-            {
-                _context.Add(movies);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(movies); */
         }
 
         // Post: Movies/Upload
