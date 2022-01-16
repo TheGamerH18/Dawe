@@ -59,17 +59,26 @@ namespace Dawe.Controllers
         {
             if(ModelState.IsValid)
             {
-                // Resize Cover
-                Image img = Image.Load(upload.CoverFile.OpenReadStream());
-                img.Mutate(x => x.Resize(new ResizeOptions()
+                Image img;
+                if(upload.CoverFile == null)
                 {
-                    Mode = ResizeMode.BoxPad,
-                    Size = new Size(300, 450)
-                }));
+                    // Load placeholder Image as Cover
+                    _logger.LogWarning("No Cover Uploaded");
+                    img = Image.Load(Path.Combine(Environment.CurrentDirectory, @"ressources\movieplaceholder.png"));
+                } else
+                {
+                    // Resize Uploaded Cover
+                    img = Image.Load(upload.CoverFile.OpenReadStream());
+                    img.Mutate(x => x.Resize(new ResizeOptions()
+                    {
+                        Mode = ResizeMode.BoxPad,
+                        Size = new Size(300, 450)
+                    }));
+                }
                 // Copy Cover to Stream
                 using MemoryStream memoryStream = new MemoryStream();
                     img.SaveAsPng(memoryStream);
-                _logger.LogInformation(upload.MoviePath);
+
                 // Save to model
                 var movie = new Movies()
                 {
@@ -83,6 +92,7 @@ namespace Dawe.Controllers
                 movie.Tags.AddRange(list);
                 _context.Add(movie);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Uploaded Movie " + movie.Name);
                 return RedirectToAction(nameof(Index));
             }
             return View(upload);
