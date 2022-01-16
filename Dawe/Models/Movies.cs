@@ -14,6 +14,7 @@ namespace Dawe.Models
         public byte[] Cover { get; set; }
         public string Name { get; set; } = string.Empty;
 
+        [NotMapped]
         public List<string> Tags { get; } = new();
 
         public string ReleaseDate { get; set; }

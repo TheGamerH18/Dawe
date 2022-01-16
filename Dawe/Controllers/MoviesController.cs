@@ -23,7 +23,14 @@ namespace Dawe.Controllers
         // GET: Movies
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Movies.ToListAsync());
+            var movies = await _context.Movies.ToListAsync();
+            foreach (var movie in movies)
+            {
+                var tags = await _context.Tags.Where(p => p.Movie == movie).Select(p => p.Tag).ToListAsync();
+                movie.Tags.AddRange(tags);
+            }
+            movies.ForEach(mov => mov.Tags.ForEach(tags => _logger.LogInformation("Add Tag" + tags)));
+            return View(movies);
         }
 
         // GET: Movies/Details/5
@@ -87,9 +94,20 @@ namespace Dawe.Controllers
                     ReleaseDate = upload.Date,
                     Cover = memoryStream.ToArray(),
                 };
+
+                // Save Tags
                 var split = upload.Tags.Split(',');
                 var list = split.ToList();
-                movie.Tags.AddRange(list);
+                foreach (var stringtag in list)
+                {
+                    var tag = new Tags()
+                    {
+                        Movie = movie,
+                        Tag = stringtag
+                    };
+                    _context.Add(tag);
+                }
+
                 _context.Add(movie);
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Uploaded Movie " + movie.Name);
