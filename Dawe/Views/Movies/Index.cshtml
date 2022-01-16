@@ -10,30 +10,23 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-    </thead>
-    <tbody>
+
+<div class="d-flex flex-wrap">
 @foreach (var item in Model) {
-        <tr>
-            <td>
-                <img src="data:image/*;base64,@(Convert.ToBase64String(item.Cover))" />
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Tags)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReleaseDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+        <div class="card">
+            <img src="data:image/*;base64,@(Convert.ToBase64String(item.Cover))" />
+            <div class="card-body">
+                <h5 class="card-title">@Html.DisplayFor(modelitem => item.Name)</h5>
+                <p class="card-text">
+                    @foreach(var tag in item.Tags)
+                    {
+                        @Html.Display(tag + ", ")
+                    }
+                </p>
+                <a asp-action="Details" asp-route-id="@item.Id">Watch</a>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+            </div>
+        </div>
 }
-    </tbody>
-</table>
+</div>
