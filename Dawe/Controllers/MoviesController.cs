@@ -223,6 +223,9 @@ namespace Dawe.Controllers
                 return NotFound();
             }
 
+            var tags = await _context.Tags.Where(p => p.Movie == movies).Select(p => p.Tag).ToListAsync();
+            movies.Tags.AddRange(tags);
+
             return View(movies);
         }
 
