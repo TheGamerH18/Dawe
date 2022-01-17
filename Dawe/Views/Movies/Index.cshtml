@@ -11,16 +11,16 @@
     <a asp-action="Create">Create New</a>
 </p>
 
-<div class="d-flex flex-wrap">
+<div class="d-flex flex-wrap justify-content-center">
 @foreach (var item in Model) {
-        <div class="card">
+        <div class="card m-2">
             <img src="data:image/*;base64,@(Convert.ToBase64String(item.Cover))" />
             <div class="card-body">
                 <h5 class="card-title">@Html.DisplayFor(modelitem => item.Name)</h5>
                 <p class="card-text">
                     @foreach(var tag in item.Tags)
                     {
-                        @Html.Display(tag + ", ")
+                        @Html.DisplayFor(tagitem => tag)
                     }
                 </p>
                 <a asp-action="Details" asp-route-id="@item.Id">Watch</a>
