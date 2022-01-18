@@ -283,23 +283,13 @@ namespace Dawe.Controllers
         /// <returns>Formated string</returns>
         private string ListtoString(List<string> list)
         {
-            char[] en;
-            var restring = "";
-            for(int i = 0; i < list.Count - 1; i++)
+            if (list.Count == 0)
             {
-                en = list[i].ToCharArray();
-                foreach(char c in en)
-                {
-                    restring.Append(c);
-                }
-                restring.Append(',');
+                _logger.LogWarning("List Empty");
+                return null;
             }
-            en = list[list.Count - 1].ToCharArray();
-            foreach (char c in en)
-            {
-                restring.Append(c);
-            }
-            return restring;
+            var newstring = string.Join(", ", list);
+            return newstring;
         }
 
         private async void SaveTags(string tags, Movies movie)
