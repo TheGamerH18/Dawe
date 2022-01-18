@@ -218,7 +218,7 @@ namespace Dawe.Controllers
                     return BadRequest();
                 }
             }
-            return View(model);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Movies/Delete/5
