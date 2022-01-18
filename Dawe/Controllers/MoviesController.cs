@@ -318,7 +318,7 @@ namespace Dawe.Controllers
         private async void DeleteTags(Movies movie)
         {
             var tags = _context.Tags.Where(tags => tags.Movie == movie).ToListAsync();
-            _context.RemoveRange(tags);
+            _context.RemoveRange(tags.Result);
             await _context.SaveChangesAsync();
         }
 
