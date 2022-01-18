@@ -198,7 +198,7 @@ namespace Dawe.Controllers
                     {
                         // Delete Tags and Create Tags
                         DeleteTags(movie);
-                        var tags = CreateTags(model.Tags, movie);
+                        SaveTags(model.Tags, movie);
                         // Modify Movie
                         movie.Name = model.Name;
                         movie.ReleaseDate = model.Date;
