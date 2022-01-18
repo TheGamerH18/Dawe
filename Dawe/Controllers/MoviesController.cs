@@ -229,15 +229,11 @@ namespace Dawe.Controllers
                 return NotFound();
             }
 
-            var movies = await _context.Movies
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var movies = await GetMovie((int)id);
             if (movies == null)
             {
                 return NotFound();
             }
-
-            var tags = await _context.Tags.Where(p => p.Movie == movies).Select(p => p.Tag).ToListAsync();
-            movies.Tags.AddRange(tags);
 
             return View(movies);
         }
