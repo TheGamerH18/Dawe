@@ -1,4 +1,4 @@
-﻿@model Dawe.Models.Movies
+﻿@model Dawe.Controllers.EditModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -13,16 +13,14 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="id" />
             <div class="form-group">
-                <label asp-for="MoviePath" class="control-label"></label>
-                <input asp-for="MoviePath" class="form-control" />
-                <span asp-validation-for="MoviePath" class="text-danger"></span>
+                <img src="data:img/*;base64,@(Convert.ToBase64String(Model.Coverbyte))" />
             </div>
             <div class="form-group">
-                <label asp-for="Cover" class="control-label"></label>
-                <input asp-for="Cover" class="form-control" />
-                <span asp-validation-for="Cover" class="text-danger"></span>
+                <label asp-for="CoverFile" class="control-label"></label>
+                <input asp-for="CoverFile" class="form-control" />
+                <span asp-validation-for="CoverFile" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
@@ -35,9 +33,9 @@
                 <span asp-validation-for="Tags" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ReleaseDate" class="control-label"></label>
-                <input asp-for="ReleaseDate" class="form-control" />
-                <span asp-validation-for="ReleaseDate" class="text-danger"></span>
+                <label asp-for="Date" class="control-label"></label>
+                <input asp-for="Date" class="form-control" />
+                <span asp-validation-for="Date" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

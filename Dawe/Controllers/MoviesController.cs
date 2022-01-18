@@ -165,12 +165,20 @@ namespace Dawe.Controllers
                 return NotFound();
             }
 
-            var movies = await _context.Movies.FindAsync(id);
+            var movies = await GetMovie((int)id);
+            var editmodel = new EditModel()
+            {
+                id = movies.Id,
+                Name = movies.Name,
+                Coverbyte = movies.Cover,
+                Date = movies.ReleaseDate,
+                Tags = ListtoString(movies.Tags)
+            };
             if (movies == null)
             {
                 return NotFound();
             }
-            return View(movies);
+            return View(editmodel);
         }
 
         // POST: Movies/Edit/5
@@ -178,34 +186,37 @@ namespace Dawe.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,MoviePath,Cover,Name,Tags,ReleaseDate")] Movies movies)
+        public async Task<IActionResult> Edit(int id, EditModel model)
         {
-            if (id != movies.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
-                try
+                if(id == model.id)
                 {
-                    _context.Update(movies);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MoviesExists(movies.Id))
+                    var movie = await GetMovie(id);
+                    if (movie != null)
                     {
-                        return NotFound();
+                        // Delete Tags and Create Tags
+                        DeleteTags(movie);
+                        var tags = CreateTags(model.Tags, movie);
+                        // Modify Movie
+                        movie.Name = model.Name;
+                        movie.ReleaseDate = model.Date;
+                        if(model.CoverFile != null) { movie.Cover = ConvertCover(model.CoverFile); }
+                        // Save to DB
+                        _context.Update(movie);
+                        await _context.SaveChangesAsync();
                     }
                     else
                     {
-                        throw;
+                        return BadRequest();
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                else
+                {
+                    return BadRequest();
+                }
             }
-            return View(movies);
+            return View(model);
         }
 
         // GET: Movies/Delete/5
@@ -338,6 +349,17 @@ namespace Dawe.Controllers
         public string MoviePath { get; set; }
         public string Name { get; set; }
         public string Tags  { get; set; }
+        public string Date { get; set; }
+    }
+
+    public class EditModel
+    {
+        public int id { get; set; }
+        public byte[] Coverbyte { get; set; }
+        [BindProperty]
+        public IFormFile CoverFile { get; set; }
+        public string Name { get; set; }
+        public string Tags { get; set; }
         public string Date { get; set; }
     }
 }
