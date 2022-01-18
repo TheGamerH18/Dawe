@@ -305,10 +305,11 @@ namespace Dawe.Controllers
             var list = tags.Split(',').ToList();
             foreach (var stringtag in list)
             {
+                var trimedtag = stringtag.Trim();
                 var tag = new Tags()
                 {
                     Movie = movie,
-                    Tag = stringtag
+                    Tag = trimedtag
                 };
                 tagsList.Add(tag);
             }
