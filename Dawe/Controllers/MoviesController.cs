@@ -166,6 +166,7 @@ namespace Dawe.Controllers
             }
 
             var movies = await GetMovie((int)id);
+            if(movies == null) return NoContent();
             var editmodel = new EditModel()
             {
                 id = movies.Id,
