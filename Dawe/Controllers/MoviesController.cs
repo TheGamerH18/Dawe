@@ -72,7 +72,8 @@ namespace Dawe.Controllers
                     // Load placeholder Image as Cover
                     _logger.LogWarning("No Cover Uploaded");
                     img = Image.Load(Path.Combine(Environment.CurrentDirectory, @"ressources\movieplaceholder.png"));
-                } else
+                } 
+                else
                 {
                     // Resize Uploaded Cover
                     img = Image.Load(upload.CoverFile.OpenReadStream());
@@ -96,8 +97,7 @@ namespace Dawe.Controllers
                 };
 
                 // Save Tags
-                var split = upload.Tags.Split(',');
-                var list = split.ToList();
+                var list = upload.Tags.Split(',').ToList();
                 foreach (var stringtag in list)
                 {
                     var tag = new Tags()
@@ -205,6 +205,7 @@ namespace Dawe.Controllers
                         // Save to DB
                         _context.Update(movie);
                         await _context.SaveChangesAsync();
+                        return View(model);
                     }
                     else
                     {
