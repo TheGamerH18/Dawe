@@ -245,6 +245,90 @@ namespace Dawe.Controllers
         {
             return _context.Movies.Any(e => e.Id == id);
         }
+
+        /// <summary>
+        /// Search is in the database for a movie with the specified id
+        /// </summary>
+        /// <param name="id">id of the movie</param>
+        /// <returns>The movie or null if no movie was found</returns>
+        private async Task<Movies> GetMovie(int id)
+        {
+            if (_context.Movies.Any(m => m.Id == id))
+            {
+                var movie = await _context.Movies.FindAsync(id);
+                var tags = await _context.Tags.Where(tag => tag.Movie == movie).Select(tag => tag.Tag).ToListAsync();
+                movie.Tags.AddRange(tags);
+                return movie;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Reformates a List to a single string. Every Value is seperated with a ','
+        /// </summary>
+        /// <param name="list">List, that needs to be converted</param>
+        /// <returns>Formated string</returns>
+        private string ListtoString(List<string> list)
+        {
+            char[] en;
+            var restring = "";
+            for(int i = 0; i < list.Count - 1; i++)
+            {
+                en = list[i].ToCharArray();
+                foreach(char c in en)
+                {
+                    restring.Append(c);
+                }
+                restring.Append(',');
+            }
+            en = list[list.Count - 1].ToCharArray();
+            foreach (char c in en)
+            {
+                restring.Append(c);
+            }
+            return restring;
+        }
+
+        private async void SaveTags(string tags, Movies movie)
+        {
+            var list = CreateTags(tags, movie);
+            await _context.AddRangeAsync(list);
+            await _context.SaveChangesAsync();
+        }
+
+        private List<Tags> CreateTags(string tags, Movies movie)
+        {
+            var tagsList = new List<Tags>();
+            var list = tags.Split(',').ToList();
+            foreach (var stringtag in list)
+            {
+                var tag = new Tags()
+                {
+                    Movie = movie,
+                    Tag = stringtag
+                };
+                tagsList.Add(tag);
+            }
+            return tagsList;
+        }
+
+        private async void DeleteTags(Movies movie)
+        {
+            var tags = _context.Tags.Where(tags => tags.Movie == movie).ToListAsync();
+            _context.RemoveRange(tags);
+            await _context.SaveChangesAsync();
+        }
+
+        private byte[] ConvertCover (IFormFile Cover)
+        {
+            var img = Image.Load(Path.Combine(Environment.CurrentDirectory, @"ressources\movieplaceholder.png"));
+            using MemoryStream memoryStream = new MemoryStream();
+                img.SaveAsPng(memoryStream);
+            return memoryStream.ToArray();
+        }
     }
 
     public class UploadModel
