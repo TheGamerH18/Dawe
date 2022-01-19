@@ -41,8 +41,7 @@ namespace Dawe.Controllers
                 return NotFound();
             }
 
-            var movies = await _context.Movies
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var movies = await GetMovie((int)id);
             if (movies == null)
             {
                 return NotFound();
@@ -66,34 +65,13 @@ namespace Dawe.Controllers
         {
             if(ModelState.IsValid)
             {
-                Image img;
-                if(upload.CoverFile == null)
-                {
-                    // Load placeholder Image as Cover
-                    _logger.LogWarning("No Cover Uploaded");
-                    img = Image.Load(Path.Combine(Environment.CurrentDirectory, @"ressources\movieplaceholder.png"));
-                } 
-                else
-                {
-                    // Resize Uploaded Cover
-                    img = Image.Load(upload.CoverFile.OpenReadStream());
-                    img.Mutate(x => x.Resize(new ResizeOptions()
-                    {
-                        Mode = ResizeMode.BoxPad,
-                        Size = new Size(300, 450)
-                    }));
-                }
-                // Copy Cover to Stream
-                using MemoryStream memoryStream = new MemoryStream();
-                    img.SaveAsPng(memoryStream);
-
                 // Save to model
                 var movie = new Movies()
                 {
                     Name = upload.Name,
                     MoviePath = upload.MoviePath,
                     ReleaseDate = upload.Date,
-                    Cover = memoryStream.ToArray(),
+                    Cover = ConvertCover(upload.CoverFile),
                 };
 
                 // Save Tags
