@@ -292,6 +292,11 @@ namespace Dawe.Controllers
             return newstring;
         }
 
+        /// <summary>
+        /// Saves Tags to Database
+        /// </summary>
+        /// <param name="tags">String containing the tags, each seperated with ','</param>
+        /// <param name="movie">Movie which is next to the tags</param>
         private async void SaveTags(string tags, Movies movie)
         {
             var list = CreateTags(tags, movie);
@@ -299,6 +304,12 @@ namespace Dawe.Controllers
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Splits the tag string and creates new Tags objects and puts them in a list.
+        /// </summary>
+        /// <param name="tags">String containing the tags, each separeted with ','</param>
+        /// <param name="movie">Movie which is next to the tags</param>
+        /// <returns>List Containing all detected Tags</returns>
         private List<Tags> CreateTags(string tags, Movies movie)
         {
             var tagsList = new List<Tags>();
@@ -316,16 +327,40 @@ namespace Dawe.Controllers
             return tagsList;
         }
 
+        /// <summary>
+        /// Deletes all tags, that are belonging to the movie
+        /// </summary>
+        /// <param name="movie">Movie that owns the tags</param>
         private async void DeleteTags(Movies movie)
         {
             var tags = _context.Tags.Where(tags => tags.Movie == movie).ToListAsync();
             _context.RemoveRange(tags.Result);
             await _context.SaveChangesAsync();
         }
-
+        
+        /// <summary>
+        /// Converts an IFormFile to Image, resizes it, and copies it to an byte array
+        /// </summary>
+        /// <param name="Cover">IFormFile, that is supossed to be converted</param>
+        /// <returns>Converted byte array</returns>
         private byte[] ConvertCover (IFormFile Cover)
         {
-            var img = Image.Load(Path.Combine(Environment.CurrentDirectory, @"ressources\movieplaceholder.png"));
+            Image img;
+            if(Cover == null)
+            {
+                // Load placeholder image
+                img = Image.Load(Path.Combine(Environment.CurrentDirectory, @"ressources\movieplaceholder.png"));
+            } else
+            {
+                // Load Specified Image and resize
+                img = Image.Load(Cover.OpenReadStream());
+                img.Mutate(x => x.Resize(new ResizeOptions()
+                {
+                    Mode = ResizeMode.BoxPad,
+                    Size = new Size(300, 450)
+                }));
+            }
+            // Copy Image to array
             using MemoryStream memoryStream = new MemoryStream();
                 img.SaveAsPng(memoryStream);
             return memoryStream.ToArray();
