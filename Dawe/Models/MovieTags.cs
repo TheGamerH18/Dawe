@@ -2,7 +2,7 @@
 
 namespace Dawe.Models
 {
-    public class Tags
+    public class MovieTags
     {
         [Key]
         public int Id { get; set; }

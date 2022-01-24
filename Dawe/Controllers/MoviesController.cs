@@ -78,7 +78,7 @@ namespace Dawe.Controllers
                 var list = upload.Tags.Split(',').ToList();
                 foreach (var stringtag in list)
                 {
-                    var tag = new Tags()
+                    var tag = new MovieTags()
                     {
                         Movie = movie,
                         Tag = stringtag
@@ -288,14 +288,14 @@ namespace Dawe.Controllers
         /// <param name="tags">String containing the tags, each separeted with ','</param>
         /// <param name="movie">Movie which is next to the tags</param>
         /// <returns>List Containing all detected Tags</returns>
-        private List<Tags> CreateTags(string tags, Movies movie)
+        private List<MovieTags> CreateTags(string tags, Movies movie)
         {
-            var tagsList = new List<Tags>();
+            var tagsList = new List<MovieTags>();
             var list = tags.Split(',').ToList();
             foreach (var stringtag in list)
             {
                 var trimedtag = stringtag.Trim();
-                var tag = new Tags()
+                var tag = new MovieTags()
                 {
                     Movie = movie,
                     Tag = trimedtag
