@@ -1,4 +1,5 @@
 ﻿using Dawe.Data;
+using Dawe.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,9 +22,24 @@ namespace Dawe.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var shows = await _context.Shows.ToListAsync();
+            var shows = await _context.Show.ToListAsync();
             
             return View(shows);
+        }
+
+        public async Task<Show?> GetShow(int id)
+        {
+            if(_context.Show.Any(m => m.Id == id))
+            {
+                var show = await _context.Show.FindAsync(id);
+                var tags = await _context.ShowTags.Where(tag => tag.Show == show).Select(tag => tag.Tag).ToListAsync();
+                show.Tags.AddRange(tags);
+                return show;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public class UploadModel
