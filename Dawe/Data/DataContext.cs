@@ -6,7 +6,7 @@ namespace Dawe.Data
     {
         public DbSet<Models.Movies>? Movies { get; set; }
         public DbSet<Models.MovieTags>? Tags { get; set; }
-        public DbSet<Models.Show>? Show { get; set; }
+        public DbSet<Models.Show>? Shows { get; set; }
         public DbSet<Models.ShowTags>? ShowTags { get; set;}
         public DbSet<Models.Episode>? Episodes { get; set;}
         public string DBPath { get; set; }
