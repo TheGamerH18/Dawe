@@ -50,9 +50,29 @@ namespace Dawe.Controllers
                 var tags = CreateTags(upload.Tags);
                 SaveTags(tags, show);
 
+                await _context.Shows.AddAsync(show);
+                _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
             return View(upload);
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if(id != null)
+            {
+                var show = await GetShow((int)id);
+                if(show != null)
+                {
+                    return View(show);
+                } 
+                else
+                {
+                    return NotFound();
+                }
+            }
+            return BadRequest();
         }
 
         public async Task<Show?> GetShow(int id)

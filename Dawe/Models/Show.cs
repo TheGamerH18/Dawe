@@ -11,5 +11,7 @@ namespace Dawe.Models
         public byte[] Thumbnail { get; set; }
         [NotMapped]
         public List<string> Tags { get; set; }
+        [NotMapped]
+        public List<Episode> Episodes { get; set; }
     }
 }
