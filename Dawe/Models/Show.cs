@@ -10,8 +10,8 @@ namespace Dawe.Models
         public string Year { get; set; }
         public byte[] Thumbnail { get; set; }
         [NotMapped]
-        public List<string> Tags { get; set; }
+        public List<string> Tags { get; set; } = new();
         [NotMapped]
-        public List<Episode> Episodes { get; set; }
+        public List<Episode> Episodes { get; set; } = new();
     }
 }
