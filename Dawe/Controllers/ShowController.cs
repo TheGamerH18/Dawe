@@ -62,6 +62,14 @@ namespace Dawe.Controllers
             return View(upload);
         }
 
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return BadRequest();
+            id = (int)id;
+
+            return View();
+        }
+
         public async Task<IActionResult> Details(int? id)
         {
             if(id != null)
@@ -160,7 +168,15 @@ namespace Dawe.Controllers
             public string Description { get; set; }
             public IFormFile CoverFile { get; set; }
             public string Tags { get; set; }
-            public int EpisodeCount { get; set; }
+            public string Year { get; set; }
+        }
+
+        public class EditModel
+        {
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public IFormFile Coverfile { get; set; }
+            public string Tags { get; set; }
             public string Year { get; set; }
         }
     }
