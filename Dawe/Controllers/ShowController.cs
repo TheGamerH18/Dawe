@@ -24,9 +24,13 @@ namespace Dawe.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var shows = await _context.Shows.ToListAsync();
-            
-            return View(shows);
+            var shows = await _context.Shows.Select(s => s.Id).ToListAsync();
+            List<Show> result = new();
+            foreach(var id in shows)
+            {
+                result.Add(await GetShow(id));
+            }
+            return View(result);
         }
 
         public IActionResult Create()
@@ -81,13 +85,27 @@ namespace Dawe.Controllers
             {
                 var show = await _context.Shows.FindAsync(id);
                 var tags = await _context.ShowTags.Where(tag => tag.Show == show).Select(tag => tag.Tag).ToListAsync();
-                show.Tags.AddRange(tags);
+                if (tags.Any())
+                {
+                    show.Tags.AddRange(tags);
+                }
+                var episodes = await GetEpisodesAsync(show);
+                if(episodes != null){
+                    show.Episodes.AddRange(episodes);
+                }
                 return show;
             }
-            else
+            return null;
+        }
+
+        public async Task<List<Episode>?> GetEpisodesAsync(Show show)
+        {
+            if(_context.Episodes.Any(m => m.show == show))
             {
-                return null;
+                var episodes = _context.Episodes.Where(e => e.show == show).ToListAsync();
+                return await episodes;
             }
+            return null;
         }
 
         private List<string> CreateTags(string Tags)
