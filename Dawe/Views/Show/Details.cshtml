@@ -6,10 +6,20 @@
 
 <h1>Details</h1>
 
-<ul class="list-group">
-    @foreach (var episode in Model.Episodes){
-        <li class="list-group-item">
-
-        </li>
-    }
-</ul>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var show in Model.Episodes)
+        {
+            <tr>
+                <th scope="row">@Html.DisplayFor(number => show.episodeNumber)</th>
+                <td>@Html.DisplayFor(number => show.name)</td>
+            </tr>
+        }
+    </tbody>
+</table>
