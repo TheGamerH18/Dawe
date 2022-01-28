@@ -144,7 +144,7 @@ namespace Dawe.Controllers
                 img = Image.Load(Cover.OpenReadStream());
                 img.Mutate(x => x.Resize(new ResizeOptions()
                 {
-                    Mode = ResizeMode.BoxPad,
+                    Mode = ResizeMode.Max,
                     Size = new Size(300, 450)
                 }));
             }
