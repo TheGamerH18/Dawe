@@ -6,6 +6,7 @@ namespace Dawe.Models
     {
         [Key]
         public int episodeId { get; set; }
+        public int episodeNumber { get; set; }
         [Required]
         public Show show { get; set; }
         public string name { get; set; }
