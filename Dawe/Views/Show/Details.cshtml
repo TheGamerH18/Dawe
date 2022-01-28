@@ -1,11 +1,20 @@
 ﻿@model Dawe.Models.Show
 @{
     ViewData["Title"] = "Details";
-    Layout = "~/View/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h1>Details</h1>
 
+<div class="row">
+    <div class="col-4">
+        <img src="data:image/*;base64,@(Convert.ToBase64String(Model.Thumbnail))" />
+    </div>
+    <div class="col-6">
+        <h3>@Html.DisplayFor(m => Model.Name)</h3>
+        <p>@Html.DisplayFor(m => Model.Description)</p>
+    </div>
+</div>
 <table class="table">
     <thead>
         <tr>
