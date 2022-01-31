@@ -1,0 +1,46 @@
+﻿@model Dawe.Controllers.ShowController.EditModel
+@{
+}
+
+<h1>Edit</h1>
+
+<div class="row">
+    <div class="col-5">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input hidden asp-for="Id" />
+            <div class="form-group">
+                <img src="data:image/*;base64,@(Convert.ToBase64String(Model.Coverbyte))"
+            </div>
+            <div class="form-group">
+                <label asp-for="Coverfile" class="control-label"></label>
+                <input asp-for="Coverfile" class="form-control" />
+                <span asp-validation-for="Coverfile" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Tags" class="control-label"></label>
+                <input asp-for="Tags" class="form-control" />
+                <span asp-validation-for="Tags" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Year" class="control-label"></label>
+                <input asp-for="Year" class="form-control" />
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+
+        </form>
+    </div>
+</div>

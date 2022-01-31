@@ -65,9 +65,24 @@ namespace Dawe.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return BadRequest();
-            id = (int)id;
+            var show = await GetShow((int)id);
 
-            return View();
+            var model = new EditModel()
+            {
+                Coverbyte = show.Thumbnail,
+                Name = show.Name,
+                Description = show.Description,
+                Id = show.Id,
+                Year = show.Year,
+                Tags = ListtoString(show.Tags),
+                Episodes = show.Episodes
+            };
+            return View(model);
+        }
+
+        public async Task<IActionResult> AddEpisode()
+        {
+            return BadRequest();
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -87,7 +102,7 @@ namespace Dawe.Controllers
             return BadRequest();
         }
 
-        public async Task<Show?> GetShow(int id)
+        public async Task<Show> GetShow(int id)
         {
             if(_context.Shows.Any(m => m.Id == id))
             {
@@ -137,6 +152,16 @@ namespace Dawe.Controllers
             await _context.ShowTags.AddRangeAsync(taglist);
             _context.SaveChangesAsync();
         }
+        private string ListtoString(List<string> list)
+        {
+            if (list.Count == 0)
+            {
+                _logger.LogWarning("List Empty");
+                return string.Empty;
+            }
+            var newstring = string.Join(", ", list);
+            return newstring;
+        }
 
         private byte[] ConvertCover(IFormFile Cover)
         {
@@ -173,11 +198,15 @@ namespace Dawe.Controllers
 
         public class EditModel
         {
+            public int Id { get; set; }
             public string Name { get; set; }
             public string Description { get; set; }
+            public byte[] Coverbyte { get; set; }
             public IFormFile Coverfile { get; set; }
             public string Tags { get; set; }
             public string Year { get; set; }
+            public List<Episode> Episodes { get; set; }
+
         }
     }
 }
