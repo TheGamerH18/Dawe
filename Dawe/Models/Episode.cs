@@ -11,6 +11,5 @@ namespace Dawe.Models
         public Show show { get; set; }
         public string name { get; set; }
         public string EpisodePath { get; set; }
-        public byte[] Cover { get; set; }
     }
 }
