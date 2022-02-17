@@ -1,0 +1,24 @@
+﻿@model Dawe.Controllers.ShowController.EpisodeCreateModel
+@{
+    ViewData["Title"] = "Add Episode";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <form asp-action="AddEpisode">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input hidden id="epath" asp-for="Path" />
+        <div class="form-group">
+            <label asp-for="EpisodeNumber" class="control-label"></label>
+            <input asp-for="EpisodeNumber" class="form-control" />
+            <span asp-validation-for="EpisodeNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="name" class="control-label"></label>
+            <input asp-for="name" class="form-control" />
+            <span asp-validation-for="name" class="text-danger"></span>
+        </div>
+    </form>
+</div>
