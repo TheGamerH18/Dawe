@@ -80,10 +80,34 @@ namespace Dawe.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> AddEpisode()
+        // /Shows/AddEpisode
+        public IActionResult AddEpisode(int? id)
         {
+            if(id == null) return BadRequest();
+            EpisodeCreateModel model = new()
+            {
+                showid = (int)id
+            };
+            return View(model);
+        }
 
-            return BadRequest();
+        // POST: /Shows/AddEpisode
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddEpisode(EpisodeCreateModel model)
+        {
+            if(!ModelState.IsValid) return BadRequest();
+
+            Episode episode = new()
+            {
+                name = model.name,
+                EpisodePath = model.Path,
+                episodeNumber = model.EpisodeNumber,
+                show = await GetShow(model.showid)
+            };
+            await _context.Episodes.AddAsync(episode);
+            _context.SaveChangesAsync();
+            return await Edit(model.showid);
         }
 
         // Shows/Upload
@@ -97,6 +121,7 @@ namespace Dawe.Controllers
             // Validate Extension
             if (!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName)))
             {
+                _logger.LogWarning("Invalid extension");
                 return BadRequest();
             }
             // Create file name
@@ -108,7 +133,6 @@ namespace Dawe.Controllers
             // Save File
             using (FileStream output = System.IO.File.Create(path))
                 await files.CopyToAsync(output);
-
             return Ok(filename);
         }
 
@@ -254,6 +278,7 @@ namespace Dawe.Controllers
 
         public class EpisodeCreateModel
         {
+            public int showid { get; set; }
             public string Path { get; set; }
             public string name { get; set; }
             public int EpisodeNumber { get; set; }
