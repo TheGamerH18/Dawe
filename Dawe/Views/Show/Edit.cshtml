@@ -42,5 +42,28 @@
             </div>
 
         </form>
+        <p>
+            <a asp-action="AddEpisode">Add new Episode</a>
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in Model.Episodes)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(x => item.episodeNumber)</td>
+                        <td>@Html.DisplayFor(x => item.name)</td>
+                        <a asp-action="EditEpisode" asp-route-id="@item.episodeId">Edit</a>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
     </div>
 </div>
