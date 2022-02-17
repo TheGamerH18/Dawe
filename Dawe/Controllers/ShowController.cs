@@ -107,7 +107,7 @@ namespace Dawe.Controllers
             };
             await _context.Episodes.AddAsync(episode);
             _context.SaveChangesAsync();
-            return await Edit(model.showid);
+            return RedirectToAction(nameof(Edit), new { id = model.showid });
         }
 
         // Shows/Upload
