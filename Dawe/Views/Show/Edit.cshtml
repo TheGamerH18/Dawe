@@ -47,7 +47,7 @@
         <p>
             <a asp-action="AddEpisode" asp-route-id="@Model.Id">Add new Episode</a>
         </p>
-        <table>
+        <table class="table table-hover">
             <thead>
                 <tr>
                     <th scope="col">#</th>
@@ -61,7 +61,7 @@
                     <tr>
                         <td>@Html.DisplayFor(x => item.episodeNumber)</td>
                         <td>@Html.DisplayFor(x => item.name)</td>
-                        <a asp-action="EditEpisode" asp-route-id="@item.episodeId">Edit</a>
+                        <td><a asp-action="EditEpisode" asp-route-id="@item.episodeId">Edit</a></td>
                     </tr>
                 }
             </tbody>
