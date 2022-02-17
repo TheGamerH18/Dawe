@@ -40,10 +40,12 @@
                 <input asp-for="Year" class="form-control" />
                 <span asp-validation-for="Year" class="text-danger"></span>
             </div>
-
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
         </form>
         <p>
-            <a asp-action="AddEpisode">Add new Episode</a>
+            <a asp-action="AddEpisode" asp-route-id="@Model.Id">Add new Episode</a>
         </p>
         <table>
             <thead>
