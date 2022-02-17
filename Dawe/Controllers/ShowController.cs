@@ -82,6 +82,7 @@ namespace Dawe.Controllers
 
         public async Task<IActionResult> AddEpisode()
         {
+
             return BadRequest();
         }
 
@@ -130,6 +131,7 @@ namespace Dawe.Controllers
             }
             return null;
         }
+
 
         private List<string> CreateTags(string Tags)
         {
@@ -207,6 +209,13 @@ namespace Dawe.Controllers
             public string Year { get; set; }
             public List<Episode> Episodes { get; set; }
 
+        }
+
+        public class EpisodeCreateModel
+        {
+            public string Path { get; set; }
+            public string name { get; set; }
+            public int EpisodeNumber { get; set; }
         }
     }
 }
