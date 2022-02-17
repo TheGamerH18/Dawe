@@ -110,6 +110,34 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Edit), new { id = model.showid });
         }
 
+        public IActionResult EditEpisode(int? id)
+        {
+            if(id == null) return BadRequest();
+            var episode = _context.Episodes.Find((int)id);
+            var model = new EpisodeEditModel()
+            {
+                id = id,
+                Name = episode.name,
+                EpisodeNumber = episode.episodeNumber
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditEpisode(EpisodeEditModel model)
+        {
+            var episode = _context.Episodes.Find(model.id);
+            if (episode == null) return BadRequest();
+
+            episode.name = model.Name;
+            episode.episodeNumber = model.EpisodeNumber;
+
+            _context.Episodes.Update(episode);
+            _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Edit), new { id = episode.show.Id});
+        }
+
         // Shows/Upload
         // Disabled Size Limit
         [HttpPost]
@@ -281,6 +309,13 @@ namespace Dawe.Controllers
             public int showid { get; set; }
             public string Path { get; set; }
             public string name { get; set; }
+            public int EpisodeNumber { get; set; }
+        }
+
+        public class EpisodeEditModel
+        {
+            public int id { get; set; }
+            public string Name { get; set; }
             public int EpisodeNumber { get; set; }
         }
     }
