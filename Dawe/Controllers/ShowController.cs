@@ -19,9 +19,7 @@ namespace Dawe.Controllers
             _environment = environment;
             _logger = logger;
         }
-
-
-
+ 
         public async Task<IActionResult> Index()
         {
             var shows = await _context.Shows.Select(s => s.Id).ToListAsync();
@@ -116,10 +114,10 @@ namespace Dawe.Controllers
             var episode = _context.Episodes.Find((int)id);
             var model = new EpisodeEditModel()
             {
-                id = id,
+                id = (int)id,
                 Name = episode.name,
                 EpisodeNumber = episode.episodeNumber
-            }
+            };
             return View(model);
         }
 
@@ -135,7 +133,7 @@ namespace Dawe.Controllers
 
             _context.Episodes.Update(episode);
             _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Edit), new { id = episode.show.Id});
+            return RedirectToAction(nameof(Edit), new { id = episode.show });
         }
 
         // Shows/Upload
