@@ -22,3 +22,49 @@
         </div>
     </form>
 </div>
+<div class="row">
+    <form id="fileform" action="/Shows/Upload" enctype="multipart/form-data" method="post">
+        <div class="form-group">
+            <input id="files" class="form-control" name="files" type="file" size="1" onchange="uploadFiles('files');" />
+        </div>
+        <div class="progress">
+            <div id="uploadprogress" class="progress-bar" role="progressbar" style="width: 75%" aria-valuenow="75" aria-aria-valuemin="0" aria-aria-valuemax="100"></div>
+        </div>
+    </form>
+</div>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function uploadFiles(inputId) {
+            var input  = document.getElementById(inputId);
+            var files = input.files;
+            var formData = new FormData();
+                formData.append("files", files[0]);
+            $.ajax(
+                {
+                    xhr: function() {
+                        var xhr = new window.XMLHttpRequest();
+                        xhr.upload.addEventListener('progress', function(event) {
+                            if(event.lengthComputable) {
+                                var percent = event.loaded / event.total * 100;
+                                $('#uploadprogress').width(percent+'%').attr('aria-valuenow', percent);
+                            }
+                        });
+                        return xhr;
+                    },
+                    url: "Shows/Upload",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    type: "POST",
+                    success: function(data) {
+                        alert("File Uploaded");
+                        $("#epath").val(data);
+                    }
+                }
+            );
+        }
+    </script>
+}
