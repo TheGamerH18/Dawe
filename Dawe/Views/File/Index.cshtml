@@ -1,0 +1,30 @@
+﻿@model IEnumerable<Dawe.Models.File>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>File Name</th>
+            <th>File Type</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var item in Model)
+        {
+            <tr>@Html.DisplayFor(x => item.Id)</tr>
+            <tr>@Html.DisplayFor(x => item.Name)</tr>
+            <tr>@Html.DisplayFor(x => item.Category.Name)</tr>
+        }
+    </tbody>
+</table>
