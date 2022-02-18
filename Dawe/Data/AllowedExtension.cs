@@ -12,4 +12,16 @@ namespace Dawe.Data
             return allowedextensions.Contains(extension);
         }
     }
+
+    public enum FileType
+    {
+        NONE,
+        MOV,
+        MP4,
+        MP3,
+        WAV,
+        ZIP,
+        PDF,
+        ISO
+    }
 }
