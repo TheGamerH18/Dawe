@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Dawe.Models;
 using Dawe.Data;
 
 namespace Dawe.Controllers
@@ -17,8 +18,10 @@ namespace Dawe.Controllers
             _logger = logger;
         }
 
+        public IActionResult Index()
         {
-            return View();
+            var files = _context.Files.ToList();
+            return View(files);
         }
     }
 }
