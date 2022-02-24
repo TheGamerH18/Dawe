@@ -42,6 +42,47 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // File/Upload
+        // Disabled Size Limit
+        [HttpPost]
+        [DisableRequestSizeLimit,
+        RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue,
+        ValueLengthLimit = int.MaxValue)]
+        public async Task<IActionResult> Upload(IFormFile files)
+        {
+            // Validate Extension
+            if (!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName)))
+            {
+                _logger.LogWarning("Invalid extension");
+                return BadRequest();
+            }
+            // Create file name
+            string filename = createFilename(Path.GetExtension(files.FileName));
+
+            // Create Path
+            string path = GetPathAndFilename(filename);
+            _logger.LogInformation(path);
+            // Save File
+            using (FileStream output = System.IO.File.Create(path))
+                await files.CopyToAsync(output);
+            return Ok(filename);
+        }
+
+        // Create Unique File name and keeping the File extension
+        private string createFilename(string fileextension)
+        {
+            return $@"{Guid.NewGuid()}{fileextension}"; ;
+        }
+
+        // Create Full Path to File
+        private string GetPathAndFilename(string filename)
+        {
+            string subfolder = "uploads/";
+            // return _hostingEnvironment.WebRootPath + "\\uploads\\" + filename;
+            string path = Path.Combine(_environment.WebRootPath, subfolder);
+            return Path.Combine(path, filename);
+        }
+
         public IActionResult CreateCategory()
         {
             return View();
