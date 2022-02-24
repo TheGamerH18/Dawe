@@ -99,16 +99,16 @@ namespace Dawe.Controllers
 
         public class FileCreateModel
         {
-            public string Name { get; set; }
-            public string Path { get; set; }
-            
-            public string selectedCategory { get; set; }
+            public string Name { get; set; } = String.Empty;
+            public string Path { get; set; } = String.Empty;
+
+            public string SelectedCategory { get; set; } = "1";
             public List<SelectListItem> Categorys { get; set; } = new List<SelectListItem>();
         }
 
         public class CategoryCreateModel
         {
-            public string Text { get; set; }
+            public string Text { get; set; } = String.Empty;
         }
     }
 }
