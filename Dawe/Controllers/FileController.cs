@@ -22,6 +22,16 @@ namespace Dawe.Controllers
         public IActionResult Index()
         {
             var files = _context.Files.ToList();
+            List<FileCategory> categories = _context.FileCategories.ToList();
+
+            foreach (var file in files)
+            {
+                categories.ForEach(x =>
+                {
+                    if (x == file.Category) file.Category = x;
+                });
+            }
+
             return View(files);
         }
 
@@ -46,7 +56,7 @@ namespace Dawe.Controllers
 
             Models.File file = new()
             {
-                Name = fileCategory.Name,
+                Name = createModel.Name,
                 Category = fileCategory,
                 Path = createModel.Path,
                 Type = result
