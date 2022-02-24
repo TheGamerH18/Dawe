@@ -37,7 +37,22 @@ namespace Dawe.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(FileCreateModel createModel)
         {
-            _logger.LogInformation(createModel.selectedCategory);
+            FileCategory? fileCategory = await _context.FileCategories.FindAsync(int.Parse(createModel.SelectedCategory));
+            if (fileCategory is null) return BadRequest();
+
+            if (!Enum.TryParse(Path.GetExtension(createModel.Path)[1..].ToUpper(), out FileType result)) return BadRequest();
+
+            if (createModel.Name.Length == 0) return BadRequest();
+
+            Models.File file = new()
+            {
+                Name = fileCategory.Name,
+                Category = fileCategory,
+                Path = createModel.Path,
+                Type = result
+            };
+            await _context.Files.AddAsync(file);
+            _ = _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
@@ -51,13 +66,15 @@ namespace Dawe.Controllers
         public async Task<IActionResult> Upload(IFormFile files)
         {
             // Validate Extension
-            if (!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName)))
+            var extension = Path.GetExtension(files.FileName);
+            if(extension is null) return BadRequest();
+            if (!Enum.TryParse(extension[1..].ToUpper(), out FileType _))
             {
-                _logger.LogWarning("Invalid extension");
+                _logger.LogWarning("Invalid extension " + extension);
                 return BadRequest();
             }
             // Create file name
-            string filename = createFilename(Path.GetExtension(files.FileName));
+            string filename = createFilename(extension);
 
             // Create Path
             string path = GetPathAndFilename(filename);
