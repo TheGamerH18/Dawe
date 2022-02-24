@@ -22,9 +22,12 @@
     <tbody>
         @foreach(var item in Model)
         {
-            <tr>@Html.DisplayFor(x => item.Id)</tr>
-            <tr>@Html.DisplayFor(x => item.Name)</tr>
-            <tr>@Html.DisplayFor(x => item.Category.Name)</tr>
+            <tr>
+                <td>@Html.DisplayFor(x => item.Id)</td>
+                <td>@Html.DisplayFor(x => item.Name)</td>
+                <td>@Html.DisplayFor(x => item.Type)</td>
+                <td>@Html.DisplayFor(x => item.Category.Name)</td>
+            </tr>
         }
     </tbody>
 </table>
