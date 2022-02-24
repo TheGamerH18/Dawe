@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Dawe.Models;
 using Dawe.Data;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Dawe.Controllers
 {
@@ -26,7 +27,19 @@ namespace Dawe.Controllers
 
         public IActionResult Create()
         {
-            return View();
+            FileCreateModel model = new();
+            List<FileCategory> categories = _context.FileCategories.ToList();
+            categories.ForEach(x => model.Categorys.Add(new SelectListItem(x.Name, x.Id.ToString())));
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(FileCreateModel createModel)
+        {
+            _logger.LogInformation(createModel.selectedCategory);
+
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult CreateCategory()
@@ -47,6 +60,9 @@ namespace Dawe.Controllers
         {
             public string Name { get; set; }
             public string Path { get; set; }
+            
+            public string selectedCategory { get; set; }
+            public List<SelectListItem> Categorys { get; set; } = new List<SelectListItem>();
         }
 
         public class CategoryCreateModel
