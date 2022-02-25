@@ -70,6 +70,21 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteFile(int? id)
+        {
+            if(id is null) return BadRequest();
+            var file = await _context.Files.FindAsync(id);
+            if (file is null) return NotFound();
+
+            IFileHelper.DeleteFile(file.Path, _environment.WebRootPath);
+            _context.Remove(file);
+            _ = _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         // File/Upload
         // Disabled Size Limit
         [HttpPost]
