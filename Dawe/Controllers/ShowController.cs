@@ -104,7 +104,7 @@ namespace Dawe.Controllers
                 show = await GetShow(model.showid)
             };
             await _context.Episodes.AddAsync(episode);
-            _context.SaveChangesAsync();
+            _ = _context.SaveChangesAsync();
             return RedirectToAction(nameof(Edit), new { id = model.showid });
         }
 
@@ -112,6 +112,7 @@ namespace Dawe.Controllers
         {
             if(id == null) return BadRequest();
             var episode = _context.Episodes.Find((int)id);
+            if(episode is null) return BadRequest();
             var model = new EpisodeEditModel()
             {
                 id = (int)id,
@@ -151,30 +152,15 @@ namespace Dawe.Controllers
                 return BadRequest();
             }
             // Create file name
-            string filename = createFilename(Path.GetExtension(files.FileName));
+            string filename = IFileHelper.CreateFilename(Path.GetExtension(files.FileName));
 
             // Create Path
-            string path = GetPathAndFilename(filename);
+            string path = IFileHelper.GetPathAndFilename(filename, _environment.WebRootPath);
             _logger.LogInformation(path);
             // Save File
             using (FileStream output = System.IO.File.Create(path))
                 await files.CopyToAsync(output);
             return Ok(filename);
-        }
-
-        // Create Unique File name and keeping the File extension
-        private string createFilename(string fileextension)
-        {
-            return $@"{Guid.NewGuid()}{fileextension}"; ;
-        }
-
-        // Create Full Path to File
-        private string GetPathAndFilename(string filename)
-        {
-            string subfolder = "uploads/";
-            // return _hostingEnvironment.WebRootPath + "\\uploads\\" + filename;
-            string path = Path.Combine(_environment.WebRootPath, subfolder);
-            return Path.Combine(path, filename);
         }
 
         public async Task<IActionResult> Details(int? id)

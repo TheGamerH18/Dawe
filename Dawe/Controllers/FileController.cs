@@ -2,6 +2,7 @@
 using Dawe.Models;
 using Dawe.Data;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace Dawe.Controllers
 {
@@ -45,6 +46,7 @@ namespace Dawe.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(FileCreateModel createModel)
         {
             FileCategory? fileCategory = await _context.FileCategories.FindAsync(int.Parse(createModel.SelectedCategory));
@@ -61,6 +63,7 @@ namespace Dawe.Controllers
                 Path = createModel.Path,
                 Type = result
             };
+
             await _context.Files.AddAsync(file);
             _ = _context.SaveChangesAsync();
 
@@ -73,41 +76,27 @@ namespace Dawe.Controllers
         [DisableRequestSizeLimit,
         RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue,
         ValueLengthLimit = int.MaxValue)]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile files)
         {
+
             // Validate Extension
             var extension = Path.GetExtension(files.FileName);
-            if(extension is null) return BadRequest();
+            if (extension is null) return BadRequest();
             if (!Enum.TryParse(extension[1..].ToUpper(), out FileType _))
             {
                 _logger.LogWarning("Invalid extension " + extension);
                 return BadRequest();
             }
             // Create file name
-            string filename = createFilename(extension);
+            string filename = IFileHelper.CreateFilename(extension);
 
             // Create Path
-            string path = GetPathAndFilename(filename);
-            _logger.LogInformation(path);
+            string path = IFileHelper.GetPathAndFilename(filename, _environment.WebRootPath);
             // Save File
             using (FileStream output = System.IO.File.Create(path))
                 await files.CopyToAsync(output);
             return Ok(filename);
-        }
-
-        // Create Unique File name and keeping the File extension
-        private string createFilename(string fileextension)
-        {
-            return $@"{Guid.NewGuid()}{fileextension}"; ;
-        }
-
-        // Create Full Path to File
-        private string GetPathAndFilename(string filename)
-        {
-            string subfolder = "uploads/";
-            // return _hostingEnvironment.WebRootPath + "\\uploads\\" + filename;
-            string path = Path.Combine(_environment.WebRootPath, subfolder);
-            return Path.Combine(path, filename);
         }
 
         public IActionResult CreateCategory()
@@ -126,7 +115,9 @@ namespace Dawe.Controllers
 
         public class FileCreateModel
         {
+            [Display(Name = "File Name")]
             public string Name { get; set; } = String.Empty;
+            [Required]
             public string Path { get; set; } = String.Empty;
 
             public string SelectedCategory { get; set; } = "1";
@@ -135,6 +126,7 @@ namespace Dawe.Controllers
 
         public class CategoryCreateModel
         {
+            [Required]
             public string Text { get; set; } = String.Empty;
         }
     }

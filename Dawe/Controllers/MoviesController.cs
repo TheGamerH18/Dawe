@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Dawe.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using Dawe.Data;
 
 namespace Dawe.Controllers
 {
@@ -103,36 +104,21 @@ namespace Dawe.Controllers
         public async Task<IActionResult> Upload(IFormFile files)
         {
             // Validate Extension
-            if(!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName)))
+            if (!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName)))
             {
                 return BadRequest();
             }
             // Create file name
-            string filename = createFilename(Path.GetExtension(files.FileName));
+            string filename = IFileHelper.CreateFilename(Path.GetExtension(files.FileName));
 
             // Create Path
-            string path = GetPathAndFilename(filename);
+            string path = IFileHelper.GetPathAndFilename(filename, _hostingEnvironment.WebRootPath);
             _logger.LogInformation(path);
             // Save File
             using (FileStream output = System.IO.File.Create(path))
                 await files.CopyToAsync(output);
 
             return Ok(filename);
-        }
-
-        // Create Unique File name and keeping the File extension
-        private string createFilename(string fileextension)
-        {
-            return $@"{Guid.NewGuid()}{fileextension}"; ;
-        }
-
-        // Create Full Path to File
-        private string GetPathAndFilename(string filename)
-        {
-            string subfolder = "uploads/";
-            // return _hostingEnvironment.WebRootPath + "\\uploads\\" + filename;
-            string path = Path.Combine(_hostingEnvironment.WebRootPath, subfolder);
-            return Path.Combine(path, filename);
         }
 
         // GET: Movies/Edit/5
@@ -222,10 +208,12 @@ namespace Dawe.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var movies = await _context.Movies.FindAsync(id);
+            if (movies is null) return BadRequest();
             _context.Movies.Remove(movies);
             DeleteTags(movies);
-            await _context.SaveChangesAsync();
-            System.IO.File.Delete(GetPathAndFilename(movies.MoviePath));
+            _ = _context.SaveChangesAsync();
+
+            System.IO.File.Delete(IFileHelper.GetPathAndFilename(movies.MoviePath, _hostingEnvironment.WebRootPath));
             return RedirectToAction(nameof(Index));
         }
 
