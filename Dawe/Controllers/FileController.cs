@@ -70,6 +70,15 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> EditFile(int? id)
+        {
+            if(id is null) return BadRequest();
+            var file = await _context.Files.FindAsync(id);
+            if (file is null) return NoContent();
+
+            return View(file);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteFile(int? id)
