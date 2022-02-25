@@ -124,7 +124,7 @@ namespace Dawe.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditEpisode(EpisodeEditModel model)
+        public IActionResult EditEpisode(EpisodeEditModel model)
         {
             var episode = _context.Episodes.Find(model.id);
             if (episode == null) return BadRequest();
@@ -133,8 +133,22 @@ namespace Dawe.Controllers
             episode.episodeNumber = model.EpisodeNumber;
 
             _context.Episodes.Update(episode);
-            _context.SaveChangesAsync();
+            _ = _context.SaveChangesAsync();
             return RedirectToAction(nameof(Edit), new { id = episode.show });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteEpisode(int? id)
+        {
+            if(id is null) return BadRequest();
+            var episode = await _context.Episodes.FindAsync(id);
+            if(episode is null) return NotFound();
+
+            IFileHelper.DeleteFile(episode.EpisodePath, _environment.WebRootPath);
+            _context.Remove(episode);
+            _ = _context.SaveChangesAsync();
+            return Ok();
         }
 
         // Shows/Upload

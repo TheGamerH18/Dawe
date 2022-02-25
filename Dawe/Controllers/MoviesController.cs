@@ -213,7 +213,7 @@ namespace Dawe.Controllers
             DeleteTags(movies);
             _ = _context.SaveChangesAsync();
 
-            System.IO.File.Delete(IFileHelper.GetPathAndFilename(movies.MoviePath, _hostingEnvironment.WebRootPath));
+            IFileHelper.DeleteFile(movies.MoviePath, _hostingEnvironment.WebRootPath);
             return RedirectToAction(nameof(Index));
         }
 
