@@ -10,7 +10,7 @@
     <a asp-action="Create">Create New</a>
 </p>
 
-<table class="table">
+<table class="table table-hover">
     <thead>
         <tr>
             <th>#</th>
@@ -22,7 +22,7 @@
     <tbody>
         @foreach(var item in Model)
         {
-            <tr>
+            <tr onclick="location.href='/File/Details/@item.Id'">
                 <td>@Html.DisplayFor(x => item.Id)</td>
                 <td>@Html.DisplayFor(x => item.Name)</td>
                 <td>@Html.DisplayFor(x => item.Type)</td>
