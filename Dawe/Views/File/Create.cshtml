@@ -68,6 +68,9 @@
                     processData: false,
                     contentType: false,
                     type: "POST",
+                    beforeSend: function(request) {
+                        request.setRequestHeader("RequestVerificationToken", $("[name='__RequestVerificationToken']").val());
+                    },
                     error: function(jqXHR, textStatus, errorThrown) {
                         showalert("Error in Upload " + textStatus + " | " + errorThrown, "warning", "#UploadAlert");
                     },
