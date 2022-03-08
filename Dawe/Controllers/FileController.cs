@@ -13,6 +13,18 @@ namespace Dawe.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<ShowController> _logger;
 
+        public async Task<IActionResult> Download(int? id)
+        {
+            if (id is null) return BadRequest();
+            var file = await _context.Files.FindAsync(id);
+            if(file is null) return NotFound();
+            var path = IFileHelper.GetPathAndFilename(file.Path, _environment.WebRootPath);
+            var content = await System.IO.File.ReadAllBytesAsync(path);
+
+            
+            return File(content, DataValidation.GetEnumDescription(file.Type));
+        }
+
         public FileController(DataContext context, IWebHostEnvironment environment, ILogger<ShowController> logger)
         {
             _context = context;
@@ -103,7 +115,6 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile files)
         {
-
             // Validate Extension
             var extension = Path.GetExtension(files.FileName);
             if (extension is null) return BadRequest();
