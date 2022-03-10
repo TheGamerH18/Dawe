@@ -85,10 +85,16 @@ namespace Dawe.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if(id is null) return BadRequest();
-            var file = await _context.Files.FindAsync(id);
+            var file = await getFile((int)id);
             if(file is null) return NoContent();
 
-            return View(file);
+            var dic = new Dictionary<string, string>();
+            dic.Add("Id", file.Id.ToString());
+            dic.Add("Name", file.Name);
+            if(file.Category is null) dic.Add("Category", null);
+            else dic.Add("Category", file.Category.Name);
+            dic.Add("Type", file.Type.ToString());
+            return Ok(dic);
         }
 
         public async Task<IActionResult> EditFile(int? id)
@@ -157,12 +163,26 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        private async Task<Models.File?> getFile(int fileid)
+        {
+            var file = await _context.Files.FindAsync(fileid);
+            if (file is null) return null;
+            List<FileCategory> categories = _context.FileCategories.ToList();
+
+            categories.ForEach(x =>
+            {
+                if (x == file.Category) file.Category = x;
+            });
+
+            return file;
+        }
+
         public class FileCreateModel
         {
             [Display(Name = "File Name")]
-            public string Name { get; set; } = String.Empty;
+            public string Name { get; set; } = string.Empty;
             [Required]
-            public string Path { get; set; } = String.Empty;
+            public string Path { get; set; } = string.Empty;
 
             public string SelectedCategory { get; set; } = "1";
             public List<SelectListItem> Categorys { get; set; } = new List<SelectListItem>();
@@ -171,7 +191,7 @@ namespace Dawe.Controllers
         public class CategoryCreateModel
         {
             [Required]
-            public string Text { get; set; } = String.Empty;
+            public string Text { get; set; } = string.Empty;
         }
     }
 }
