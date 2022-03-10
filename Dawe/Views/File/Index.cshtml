@@ -4,11 +4,32 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["Title"]</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<div id="filemodal" class="modal fade" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalItemName"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="ModalItemCategory">Item Category</p>
+                <p id="ModalItemId">Item id</p>
+                <p id="ModalItemType">Item Type</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" id="downloadbtn" download>Download</a>
+                <a class="btn btn-secondary" id="editbtn">Edit</a>
+                <button type="button" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <table class="table table-hover">
     <thead>
@@ -22,7 +43,7 @@
     <tbody>
         @foreach(var item in Model)
         {
-            <tr onclick="location.href='/File/Details/@item.Id'">
+            <tr data-bs-toggle="modal" data-bs-target="#filemodal" data-bs-id="@item.Id">
                 <td>@Html.DisplayFor(x => item.Id)</td>
                 <td>@Html.DisplayFor(x => item.Name)</td>
                 <td>@Html.DisplayFor(x => item.Type)</td>
@@ -31,3 +52,25 @@
         }
     </tbody>
 </table>
+
+@section Scripts{
+    <script>
+        var modal = $("#filemodal").get(0);
+        modal.addEventListener('show.bs.modal', function(event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-bs-id');
+
+            $.get("/File/Details/"+id, function(data){
+                $('#ModalItemName').text(data["Name"]);
+                $('#ModalItemId').text(data["Id"]);
+                $('#ModalItemType').text(data["Type"]);
+                $('#ModalItemCategory').text(data["Category"]);
+
+                $('#downloadbtn').attr("href", "/File/Download/"+id);
+                $('#downloadbtn').attr("download", data["Name"]);
+
+                $('#editbtn').attr("href", "/File/Edit/"+id);
+            });
+        });
+    </script>
+}
