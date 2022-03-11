@@ -100,10 +100,38 @@ namespace Dawe.Controllers
         public async Task<IActionResult> EditFile(int? id)
         {
             if(id is null) return BadRequest();
-            var file = await _context.Files.FindAsync(id);
+            var file = await getFile((int)id);
             if (file is null) return NoContent();
 
-            return View(file);
+            FileEditModel editmodel = new()
+            {
+                Name = file.Name,
+                Id = file.Id,
+                SelectedCategory = file.Category.Name
+            };
+
+            List<FileCategory> categories = _context.FileCategories.ToList();
+            categories.ForEach(x => editmodel.Categorys.Add(new SelectListItem(x.Name, x.Id.ToString())));
+
+            return View(editmodel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditFile(FileEditModel editModel)
+        {
+            if(!ModelState.IsValid) return BadRequest();
+            var file = await getFile(editModel.Id);
+            if (file is null) return BadRequest();
+
+            FileCategory? fileCategory = await _context.FileCategories.FindAsync(int.Parse(editModel.SelectedCategory));
+            if (fileCategory is null) return BadRequest();
+
+
+            file.Name = editModel.Name;
+            file.Category = fileCategory;
+
+            return Ok();
         }
 
         [HttpPost]
@@ -135,7 +163,7 @@ namespace Dawe.Controllers
             if (extension is null) return BadRequest();
             if (!Enum.TryParse(extension[1..].ToUpper(), out FileType _))
             {
-                _logger.LogWarning("Invalid extension " + extension);
+                _logger.LogWarning("invalid extension " + extension);
                 return BadRequest();
             }
             // Create file name
@@ -186,6 +214,15 @@ namespace Dawe.Controllers
 
             public string SelectedCategory { get; set; } = "1";
             public List<SelectListItem> Categorys { get; set; } = new List<SelectListItem>();
+        }
+
+        public class FileEditModel
+        {
+            public int Id { get; set; }
+            [Display(Name = "FileName")]
+            public string Name { get; set; } = string.Empty;
+            public string SelectedCategory { get; set; } = "1";
+            public List<SelectListItem> Categorys { get; } = new List<SelectListItem>();
         }
 
         public class CategoryCreateModel
