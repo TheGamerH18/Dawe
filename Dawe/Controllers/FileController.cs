@@ -3,6 +3,7 @@ using Dawe.Models;
 using Dawe.Data;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 
 namespace Dawe.Controllers
 {
@@ -97,6 +98,7 @@ namespace Dawe.Controllers
             return Ok(dic);
         }
 
+        [HttpGet]
         public async Task<IActionResult> EditFile(int? id)
         {
             if(id is null) return BadRequest();
@@ -117,21 +119,34 @@ namespace Dawe.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditFile(FileEditModel editModel)
         {
-            if(!ModelState.IsValid) return BadRequest();
+            if(!ModelState.IsValid)
+            {
+                Response.StatusCode = 500;
+                return Json("Modalstate is invalid");
+            }
             var file = await getFile(editModel.Id);
-            if (file is null) return BadRequest();
+            if (file is null)
+            {
+                Response.StatusCode = 400;
+                return Json("File not found");
+            }
 
             FileCategory? fileCategory = await _context.FileCategories.FindAsync(int.Parse(editModel.SelectedCategory));
-            if (fileCategory is null) return BadRequest();
-
+            if (fileCategory is null)
+            {
+                Response.StatusCode = 400;
+                return Json("Category not found");
+            }
 
             file.Name = editModel.Name;
             file.Category = fileCategory;
 
-            return Ok();
+            _context.Files.Update(file);
+            _ = _context.SaveChangesAsync();
+
+            return Ok("/");
         }
 
         [HttpPost]

@@ -8,7 +8,10 @@
 
 <div class="row mt-4">
     <div class="col-6">
-        <form asp-action="EditFile">
+        <form id="editform">
+            <div id="alertcontainer">
+
+            </div>
             <input hidden asp-for="Id" />
             <div class="form-floating mb-3">
                 <input asp-for="Name" class="form-control" placeholder="@nameof(Model.Name)" />
@@ -22,6 +25,7 @@
             </div>
             <div class="form-group mb-3">
                 <input id="savebtn" type="submit" value="Save" class="btn btn-primary" />
+                <button id="savebtn2" class="btn btn-secondary" onclick="">Speichern</button> 
             </div>
         </form>
     </div>
@@ -32,6 +36,22 @@
 
 
     <script>
+        $('#editform').submit(function() {
+            $.post("/File/EditFile", $("#editform").serialize(), function(data){console.log(data)})
+            return false;
+        });
 
+        function showalert(message, type, placeholder) {
+            var alertplaceholder = $(placeholder);
+            var wrapper = document.createElement('div');
+            wrapper.innerHTML = '<div class="alert alert-' + type + ' alert-dismissible" role="alert">' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+
+            alertplaceholder.append(wrapper);
+        }
+
+        function submit() {
+            $.post("/File/EditFile", $("#editform").serialize(), function(data){window.location.href = data})
+            return false;
+        }
     </script>
 }
