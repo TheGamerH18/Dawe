@@ -49,6 +49,9 @@ namespace Dawe.Data
         PDF,
         
         [Description("application/octet-stream")]
-        ISO
+        ISO,
+
+        [Description("application/x-rar-compressed")]
+        RAR
     }
 }
