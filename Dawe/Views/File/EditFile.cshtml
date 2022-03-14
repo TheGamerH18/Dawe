@@ -12,6 +12,7 @@
             <div id="alertcontainer">
 
             </div>
+            @Html.AntiForgeryToken()
             <input hidden asp-for="Id" />
             <div class="form-floating mb-3">
                 <input asp-for="Name" class="form-control" placeholder="@nameof(Model.Name)" />

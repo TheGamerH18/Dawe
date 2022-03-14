@@ -119,6 +119,7 @@ namespace Dawe.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditFile(FileEditModel editModel)
         {
             if(!ModelState.IsValid)
