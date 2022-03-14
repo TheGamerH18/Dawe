@@ -146,7 +146,7 @@ namespace Dawe.Controllers
             _context.Files.Update(file);
             _ = _context.SaveChangesAsync();
 
-            return Ok("/");
+            return Ok("/File/");
         }
 
         [HttpPost]

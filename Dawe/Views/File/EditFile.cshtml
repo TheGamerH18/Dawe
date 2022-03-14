@@ -37,7 +37,10 @@
 
     <script>
         $('#editform').submit(function() {
-            $.post("/File/EditFile", $("#editform").serialize(), function(data){console.log(data)})
+            $.post("/File/EditFile", $("#editform").serialize(), function(data){
+                console.log(data);
+                window.location.href = data;
+            });
             return false;
         });
 
@@ -47,11 +50,6 @@
             wrapper.innerHTML = '<div class="alert alert-' + type + ' alert-dismissible" role="alert">' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
 
             alertplaceholder.append(wrapper);
-        }
-
-        function submit() {
-            $.post("/File/EditFile", $("#editform").serialize(), function(data){window.location.href = data})
-            return false;
         }
     </script>
 }
