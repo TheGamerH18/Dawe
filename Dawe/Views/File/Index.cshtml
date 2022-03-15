@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<Dawe.Models.File>
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Files";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -43,7 +43,7 @@
     <tbody>
         @foreach(var item in Model)
         {
-            <tr data-bs-toggle="modal" data-bs-target="#filemodal" data-bs-id="@item.Id">
+            <tr style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#filemodal" data-bs-id="@item.Id">
                 <td>@Html.DisplayFor(x => item.Id)</td>
                 <td>@Html.DisplayFor(x => item.Name)</td>
                 <td>@Html.DisplayFor(x => item.Type)</td>
