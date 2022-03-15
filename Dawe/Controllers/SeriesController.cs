@@ -136,7 +136,7 @@ namespace Dawe.Controllers
 
             _context.Episodes.Update(episode);
             _ = _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Edit), new { id = episode.show });
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]

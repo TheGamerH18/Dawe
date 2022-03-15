@@ -15,7 +15,7 @@
         <p>@Html.DisplayFor(m => Model.Description)</p>
     </div>
 </div>
-<table class="table">
+<table class="table table-hover">
     <thead>
         <tr>
             <th scope="col">#</th>
@@ -23,11 +23,11 @@
         </tr>
     </thead>
     <tbody>
-        @foreach(var show in Model.Episodes)
+        @foreach(var episode in Model.Episodes)
         {
-            <tr>
-                <th scope="row">@Html.DisplayFor(number => show.episodeNumber)</th>
-                <td>@Html.DisplayFor(number => show.name)</td>
+            <tr style="cursor: pointer;" onclick="window.location.href = '/Series/WatchEpisode/@episode.episodeId'">
+                <th scope="row">@Html.DisplayFor(number => episode.episodeNumber)</th>
+                <td>@Html.DisplayFor(number => episode.name)</td>
             </tr>
         }
     </tbody>
