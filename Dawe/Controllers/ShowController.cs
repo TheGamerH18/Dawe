@@ -53,7 +53,7 @@ namespace Dawe.Controllers
                 SaveTags(tags, show);
 
                 await _context.Shows.AddAsync(show);
-                _context.SaveChangesAsync();
+                _ = _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -95,13 +95,15 @@ namespace Dawe.Controllers
         public async Task<IActionResult> AddEpisode(EpisodeCreateModel model)
         {
             if(!ModelState.IsValid) return BadRequest();
+            var show = await GetShow(model.showid);
+            if(show is null) return BadRequest();
 
             Episode episode = new()
             {
                 name = model.name,
                 EpisodePath = model.Path,
                 episodeNumber = model.EpisodeNumber,
-                show = await GetShow(model.showid)
+                show = show
             };
             await _context.Episodes.AddAsync(episode);
             _ = _context.SaveChangesAsync();
@@ -151,6 +153,31 @@ namespace Dawe.Controllers
             return Ok();
         }
 
+        public IActionResult WatchEpisode(int? id)
+        {
+            if (id is null) return BadRequest();
+            var episode = _context.Episodes.Find(id);
+            if (episode is null) return NotFound();
+            EpisodeWatchModel model = new()
+            {
+                Name = episode.name,
+                Id = episode.episodeId,
+                EpisodeNumber = episode.episodeNumber,
+            };
+            return View(model);
+        }
+
+        public async Task<IActionResult> Episode(int? id)
+        {
+            if (id is null) return BadRequest();
+            var episode = await _context.Episodes.FindAsync(id);
+            if (episode is null) return BadRequest();
+            var path = IFileHelper.GetPathAndFilename(episode.EpisodePath, _environment.WebRootPath);
+            var content = await System.IO.File.ReadAllBytesAsync(path);
+
+            return File(content, DataValidation.GetEnumDescription(Data.FileType.MP4));
+        }
+
         // Shows/Upload
         // Disabled Size Limit
         [HttpPost]
@@ -194,11 +221,12 @@ namespace Dawe.Controllers
             return BadRequest();
         }
 
-        public async Task<Show> GetShow(int id)
+        public async Task<Show?> GetShow(int id)
         {
             if(_context.Shows.Any(m => m.Id == id))
             {
                 var show = await _context.Shows.FindAsync(id);
+                if (show is null) return null;
                 var tags = await _context.ShowTags.Where(tag => tag.Show == show).Select(tag => tag.Tag).ToListAsync();
                 if (tags.Any())
                 {
@@ -243,7 +271,7 @@ namespace Dawe.Controllers
                 });
             }
             await _context.ShowTags.AddRangeAsync(taglist);
-            _context.SaveChangesAsync();
+            _ = _context.SaveChangesAsync();
         }
         private string ListtoString(List<string> list)
         {
@@ -314,6 +342,13 @@ namespace Dawe.Controllers
         {
             public int id { get; set; }
             public string Name { get; set; }
+            public int EpisodeNumber { get; set; }
+        }
+
+        public class EpisodeWatchModel
+        {
+            public int Id { get; set; }
+            public string Name { get; set; } = string.Empty;
             public int EpisodeNumber { get; set; }
         }
     }
