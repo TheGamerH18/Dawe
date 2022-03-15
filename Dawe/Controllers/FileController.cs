@@ -103,13 +103,13 @@ namespace Dawe.Controllers
         {
             if(id is null) return BadRequest();
             var file = await getFile((int)id);
-            if (file is null) return NoContent();
+            if (file == null || file.Category == null) return NoContent();
 
             FileEditModel editmodel = new()
             {
                 Name = file.Name,
                 Id = file.Id,
-                SelectedCategory = file.Category.Name
+                SelectedCategory = file.Category.Id.ToString()
             };
 
             List<FileCategory> categories = _context.FileCategories.ToList();
@@ -174,6 +174,7 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile files)
         {
+            if(files is null) return BadRequest();
             // Validate Extension
             var extension = Path.GetExtension(files.FileName);
             if (extension is null) return BadRequest();
