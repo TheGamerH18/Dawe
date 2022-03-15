@@ -12,7 +12,7 @@ namespace Dawe.Controllers
 
         private readonly DataContext _context;
         private readonly IWebHostEnvironment _environment;
-        private readonly ILogger<ShowController> _logger;
+        private readonly ILogger<SeriesController> _logger;
 
         public async Task<IActionResult> Download(int? id)
         {
@@ -26,7 +26,7 @@ namespace Dawe.Controllers
             return File(content, DataValidation.GetEnumDescription(file.Type));
         }
 
-        public FileController(DataContext context, IWebHostEnvironment environment, ILogger<ShowController> logger)
+        public FileController(DataContext context, IWebHostEnvironment environment, ILogger<SeriesController> logger)
         {
             _context = context;
             _environment = environment;

@@ -1,4 +1,4 @@
-﻿@model Dawe.Controllers.ShowController.EpisodeCreateModel
+﻿@model Dawe.Controllers.SeriesController.EpisodeCreateModel
 @{
     ViewData["Title"] = "Add Episode";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -58,7 +58,7 @@
                         });
                         return xhr;
                     },
-                    url: "/Show/Upload",
+                    url: "/Series/Upload",
                     data: formData,
                     processData: false,
                     contentType: false,

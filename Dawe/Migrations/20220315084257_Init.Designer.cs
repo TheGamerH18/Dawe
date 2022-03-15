@@ -3,6 +3,7 @@ using System;
 using Dawe.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dawe.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220315084257_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
@@ -133,7 +135,7 @@ namespace Dawe.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("Dawe.Models.Show", b =>
+            modelBuilder.Entity("Dawe.Models.Series", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -157,16 +159,16 @@ namespace Dawe.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Shows");
+                    b.ToTable("Series");
                 });
 
-            modelBuilder.Entity("Dawe.Models.ShowTags", b =>
+            modelBuilder.Entity("Dawe.Models.SeriesTags", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ShowId")
+                    b.Property<int>("SeriesId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Tag")
@@ -175,14 +177,14 @@ namespace Dawe.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ShowId");
+                    b.HasIndex("SeriesId");
 
-                    b.ToTable("ShowTags");
+                    b.ToTable("SeriesTags");
                 });
 
             modelBuilder.Entity("Dawe.Models.Episode", b =>
                 {
-                    b.HasOne("Dawe.Models.Show", "show")
+                    b.HasOne("Dawe.Models.Series", "show")
                         .WithMany()
                         .HasForeignKey("showId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -211,15 +213,15 @@ namespace Dawe.Migrations
                     b.Navigation("Movie");
                 });
 
-            modelBuilder.Entity("Dawe.Models.ShowTags", b =>
+            modelBuilder.Entity("Dawe.Models.SeriesTags", b =>
                 {
-                    b.HasOne("Dawe.Models.Show", "Show")
+                    b.HasOne("Dawe.Models.Series", "Series")
                         .WithMany()
-                        .HasForeignKey("ShowId")
+                        .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Show");
+                    b.Navigation("Series");
                 });
 #pragma warning restore 612, 618
         }

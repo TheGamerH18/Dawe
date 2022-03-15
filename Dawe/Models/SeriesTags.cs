@@ -2,12 +2,12 @@
 
 namespace Dawe.Models
 {
-    public class ShowTags
+    public class SeriesTags
     {
         [Key]
         public int Id { get; set; }
         [Required]
-        public Show Show { get; set; }
+        public Series Series { get; set; }
         [Required]
         public string Tag { get; set; }
     }

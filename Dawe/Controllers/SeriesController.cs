@@ -7,13 +7,13 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Dawe.Controllers
 {
-    public class ShowController : Controller
+    public class SeriesController : Controller
     {
         private readonly Data.DataContext _context;
         private readonly IWebHostEnvironment _environment;
-        private readonly ILogger<ShowController> _logger;
+        private readonly ILogger<SeriesController> _logger;
 
-        public ShowController(DataContext context, IWebHostEnvironment environment, ILogger<ShowController> logger)
+        public SeriesController(DataContext context, IWebHostEnvironment environment, ILogger<SeriesController> logger)
         {
             _context = context;
             _environment = environment;
@@ -22,8 +22,8 @@ namespace Dawe.Controllers
  
         public async Task<IActionResult> Index()
         {
-            var shows = await _context.Shows.Select(s => s.Id).ToListAsync();
-            List<Show> result = new();
+            var shows = await _context.Series.Select(s => s.Id).ToListAsync();
+            List<Series> result = new();
             foreach(var id in shows)
             {
                 result.Add(await GetShow(id));
@@ -42,7 +42,7 @@ namespace Dawe.Controllers
         {
             if(ModelState.IsValid)
             {
-                var show = new Show()
+                var show = new Series()
                 {
                     Name = upload.Name,
                     Description = upload.Description,
@@ -52,7 +52,7 @@ namespace Dawe.Controllers
                 var tags = CreateTags(upload.Tags);
                 SaveTags(tags, show);
 
-                await _context.Shows.AddAsync(show);
+                await _context.Series.AddAsync(show);
                 _ = _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -78,7 +78,7 @@ namespace Dawe.Controllers
             return View(model);
         }
 
-        // /Shows/AddEpisode
+        // /Series/AddEpisode
         public IActionResult AddEpisode(int? id)
         {
             if(id == null) return BadRequest();
@@ -89,7 +89,7 @@ namespace Dawe.Controllers
             return View(model);
         }
 
-        // POST: /Shows/AddEpisode
+        // POST: /Series/AddEpisode
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEpisode(EpisodeCreateModel model)
@@ -178,7 +178,7 @@ namespace Dawe.Controllers
             return File(content, DataValidation.GetEnumDescription(Data.FileType.MP4));
         }
 
-        // Shows/Upload
+        // Series/Upload
         // Disabled Size Limit
         [HttpPost]
         [DisableRequestSizeLimit,
@@ -221,13 +221,13 @@ namespace Dawe.Controllers
             return BadRequest();
         }
 
-        public async Task<Show?> GetShow(int id)
+        public async Task<Series?> GetShow(int id)
         {
-            if(_context.Shows.Any(m => m.Id == id))
+            if(_context.Series.Any(m => m.Id == id))
             {
-                var show = await _context.Shows.FindAsync(id);
+                var show = await _context.Series.FindAsync(id);
                 if (show is null) return null;
-                var tags = await _context.ShowTags.Where(tag => tag.Show == show).Select(tag => tag.Tag).ToListAsync();
+                var tags = await _context.SeriesTags.Where(tag => tag.Series == show).Select(tag => tag.Tag).ToListAsync();
                 if (tags.Any())
                 {
                     show.Tags.AddRange(tags);
@@ -241,7 +241,7 @@ namespace Dawe.Controllers
             return null;
         }
 
-        public async Task<List<Episode>?> GetEpisodesAsync(Show show)
+        public async Task<List<Episode>?> GetEpisodesAsync(Series show)
         {
             if(_context.Episodes.Any(m => m.show == show))
             {
@@ -259,18 +259,18 @@ namespace Dawe.Controllers
             return taglist;
         }
 
-        private async void SaveTags(List<string> tags, Show show)
+        private async void SaveTags(List<string> tags, Series show)
         {
-            var taglist = new List<ShowTags>();
+            var taglist = new List<SeriesTags>();
             foreach (var tag in tags)
             {
-                taglist.Add(new ShowTags()
+                taglist.Add(new SeriesTags()
                 {
                     Tag = tag,
-                    Show = show,
+                    Series = show,
                 });
             }
-            await _context.ShowTags.AddRangeAsync(taglist);
+            await _context.SeriesTags.AddRangeAsync(taglist);
             _ = _context.SaveChangesAsync();
         }
         private string ListtoString(List<string> list)
