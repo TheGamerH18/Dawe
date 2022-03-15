@@ -186,6 +186,7 @@ namespace Dawe.Controllers
         ValueLengthLimit = int.MaxValue)]
         public async Task<IActionResult> Upload(IFormFile files)
         {
+            if(files is null) return BadRequest();
             // Validate Extension
             if (!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName)))
             {

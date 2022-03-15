@@ -9,45 +9,48 @@
 <h4>Movies</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-6">
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="MoviePath" class="control-label" hidden></label>
-                <input asp-for="MoviePath" id="MoviePath" class="form-control" hidden />
-                <span asp-validation-for="MoviePath" class="text-danger" hidden></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CoverFile" class="control-label"></label>
-                <input asp-for="CoverFile" class="form-control" />
+            <input hidden asp-for="MoviePath" />
+            <div class="input-group mb-3">
+                <label class="input-group-text" asp-for="CoverFile"></label>
+                <input type="file" asp-for="CoverFile" class="form-control" />
                 <span asp-validation-for="CoverFile" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
+            <div class="form-floating mb-3">
+                <input asp-for="Name" class="form-control" placeholder="@nameof(Model.Name)" />
+                <label asp-for="Name"></label>
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Tags" class="control-label"></label>
-                <input asp-for="Tags" class="form-control" />
+            <div class="form-floating mb-3">
+                <input asp-for="Tags" class="form-control" placeholder="@nameof(Model.Tags)" />
+                <label asp-for="Tags"></label>
                 <span asp-validation-for="Tags" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" />
+            <div class="form-floating mb-3">
+                <input asp-for="Date" class="form-control" placeholder="@nameof(Model.Date)" />
+                <label asp-for="Date"></label>
                 <span asp-validation-for="Date" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="form-group mb-3">
+                <input id="createbtn" type="submit" value="Create" class="btn btn-primary" disabled/>
             </div>
         </form>
+    </div>
+    <div class="col-4">
         <form id="form" name="form" action="/Movies/Upload" enctype="multipart/form-data" method="post">
-            <div class="form-group">
-              <input id="files" class="form-control" name="files" type="file" size="1" onchange="uploadFiles('files');" />
+            @Html.AntiForgeryToken()
+            <div class="form-group mb-3">
+              <input id="files" class="form-control" name="files" type="file" size="1" />
             </div>
-            <div class="progress">
-                <div id="uploadprogress" class="progress-bar" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress mb-3">
+                <div id="uploadprogress" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
+            <div class="mb-3">
+                <input id="Uploadbtn" type="button" class="btn btn-primary" value="Upload" onclick="uploadFiles('files');" />
+            </div>
+            <div id="UploadAlert"></div>
         </form>
     </div>
 </div>
@@ -75,7 +78,6 @@
                     xhr.upload.addEventListener('progress', function(event) {
                         if(event.lengthComputable) {
                             var percentComplete = event.loaded / event.total * 100;
-                            console.log(percentComplete);
                             $('#uploadprogress').width(percentComplete+'%').attr('aria-valuenow', percentComplete);
                         }
                     });
@@ -86,13 +88,24 @@
                 processData: false,
                 contentType: false,
                 type: "POST",
-                success: function (data) {
-                    alert("Files Uploaded!");
-                    console.log(data);
+                error: function(jqXHR, textStatus, errorThrown) {
+                    showalert("Error in Upload " + textStatus + " | " + errorThrown, "warning", "#UploadAlert");
+                },
+                success: function (data) 
                     $("#MoviePath").val(data);
+                    showalert("Upload Succesfull", "success", "#UploadAlert");
+                    $("#Uploadbtn").toggleClass("btn-primary btn-success");
+                    $("#createbtn").prop('disabled', false);
                 }
-            }
-            );
+            });
+        }
+
+        function showalert(message, type, placeholder) {
+            var alertplaceholder = $(placeholder);
+            var wrapper = document.createElement('div');
+            wrapper.innerHTML = '<div class="alert alert-' + type + ' alert-dismissible" role="alert">' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+
+            alertplaceholder.append(wrapper);
         }
     </script>
 }
