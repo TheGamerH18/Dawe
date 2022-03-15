@@ -25,7 +25,7 @@
             <div class="modal-footer">
                 <a class="btn btn-primary" id="downloadbtn" download>Download</a>
                 <a class="btn btn-secondary" id="editbtn">Edit</a>
-                <button type="button" class="btn btn-danger">Delete</button>
+                <button type="button" class="btn btn-danger" onclick="deletefile()">Delete</button>
             </div>
         </div>
     </div>
@@ -53,6 +53,10 @@
     </tbody>
 </table>
 
+<form id="ForgeryToken">
+    @Html.AntiForgeryToken()
+</form>
+
 @section Scripts{
     <script>
         var modal = $("#filemodal").get(0);
@@ -72,5 +76,13 @@
                 $('#editbtn').attr("href", "/File/EditFile/"+id);
             });
         });
+
+        function deletefile() {
+            var id = $('#ModalItemId').text();
+            var token = $('#ForgeryToken').serialize();
+            $.post("/File/DeleteFile/"+id, token, function(event) {
+                window.location.reload();
+            });
+        }
     </script>
 }
