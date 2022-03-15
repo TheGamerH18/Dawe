@@ -13,22 +13,25 @@
     </h4>
     <hr />
     <dl class="row">
-        <video controls autoplay src="~/uploads/@Model.MoviePath"></video>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Tags)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Tags)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReleaseDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReleaseDate)
-        </dd>
+        <div class="ratio ratio-16x9">
+            <video id="videoplayer" class="video-js vjs-theme-forest" data-setup="{}" controls>
+                <source src="/Movies/Movie/@Model.Id" type="video/mp4" />
+            </video>
+        </div>
     </dl>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+@section Addons{
+    <link href="https://vjs.zencdn.net/7.18.1/video-js.css" rel="stylesheet" />
+    <link href="https://unpkg.com/@@videojs/themes@1/dist/forest/index.css" rel="stylesheet">
+}
+
+@section Scripts{
+    <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
+    <script src="https://cdn.sc.gl/videojs-hotkeys/latest/videojs.hotkeys.min.js"></script>
+    <script>
+        videojs('videoplayer').ready(function() {
+            this.hotkeys({});
+        });
+    </script>
+}

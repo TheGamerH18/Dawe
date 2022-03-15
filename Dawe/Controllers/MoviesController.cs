@@ -57,6 +57,17 @@ namespace Dawe.Controllers
             return View();
         }
 
+        public async Task<IActionResult> Movie(int? id)
+        {
+            if(id == null) return BadRequest();
+            var movie = await GetMovie((int)id);
+            if(movie == null) return NotFound();
+            var path = IFileHelper.GetPathAndFilename(movie.MoviePath, _hostingEnvironment.WebRootPath);
+            var content = await System.IO.File.ReadAllBytesAsync(path);
+
+            return File(content, "video/mp4");
+        }
+
         // POST: Movies/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
