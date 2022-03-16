@@ -91,7 +91,7 @@
                 error: function(jqXHR, textStatus, errorThrown) {
                     showalert("Error in Upload " + textStatus + " | " + errorThrown, "warning", "#UploadAlert");
                 },
-                success: function (data) 
+                success: function (data) {
                     $("#MoviePath").val(data);
                     showalert("Upload Succesfull", "success", "#UploadAlert");
                     $("#Uploadbtn").toggleClass("btn-primary btn-success");
