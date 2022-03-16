@@ -6,20 +6,14 @@
 }
 
 <h1>@ViewData["Title"]</h1>
-
-<div>
-    <h4>
-        @Html.DisplayFor(model => model.Name)
-    </h4>
-    <hr />
-    <dl class="row">
-        <div class="ratio ratio-16x9">
-            <video id="videoplayer" class="video-js vjs-theme-forest" data-setup="{}" controls>
-                <source src="/Movies/Movie/@Model.Id" type="video/mp4" />
-            </video>
-        </div>
-    </dl>
+<hr />
+<div class="ratio ratio-16x9">
+    <video id="videoplayer" class="video-js vjs-theme-forest" data-setup="{}" controls>
+        <source src="/Movies/Movie/@Model.Id" type="video/mp4" />
+    </video>
 </div>
+
+
 
 @section Addons{
     <link href="https://vjs.zencdn.net/7.18.1/video-js.css" rel="stylesheet" />
