@@ -173,9 +173,9 @@ namespace Dawe.Controllers
             var episode = await _context.Episodes.FindAsync(id);
             if (episode is null) return BadRequest();
             var path = IFileHelper.GetPathAndFilename(episode.EpisodePath, _environment.WebRootPath);
-            var content = await System.IO.File.ReadAllBytesAsync(path);
+            var content = System.IO.File.OpenRead(path);
 
-            return File(content, DataValidation.GetEnumDescription(Data.FileType.MP4));
+            return File(content, DataValidation.GetEnumDescription(Data.FileType.MP4), enableRangeProcessing: true);
         }
 
         // Series/Upload

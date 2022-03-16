@@ -63,9 +63,9 @@ namespace Dawe.Controllers
             var movie = await GetMovie((int)id);
             if(movie == null) return NotFound();
             var path = IFileHelper.GetPathAndFilename(movie.MoviePath, _hostingEnvironment.WebRootPath);
-            var content = await System.IO.File.ReadAllBytesAsync(path);
+            var content = System.IO.File.OpenRead(path);
 
-            return File(content, "video/mp4");
+            return File(content, "video/mp4", enableRangeProcessing: true);
         }
 
         // POST: Movies/Create

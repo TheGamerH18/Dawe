@@ -20,7 +20,7 @@ namespace Dawe.Controllers
             var file = await _context.Files.FindAsync(id);
             if(file is null) return NotFound();
             var path = IFileHelper.GetPathAndFilename(file.Path, _environment.WebRootPath);
-            var content = await System.IO.File.ReadAllBytesAsync(path);
+            var content = System.IO.File.OpenRead(path);
 
             
             return File(content, DataValidation.GetEnumDescription(file.Type));
