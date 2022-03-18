@@ -33,9 +33,9 @@
             </div>
             
             <div class="form-group">
-                <label asp-for="Tags" class="control-label"></label>
-                <input asp-for="Tags" class="form-control" />
-                <span asp-validation-for="Tags" class="text-danger"></span>
+                @Html.DropDownListFor(x => x.SelectedCategory, new SelectList(Model.Categorys, "Value", "Text"), htmlAttributes: new { @case = "form-select", id = "Category"})
+                <label for="Category">category</label>
+                @Html.ValidationMessageFor(x => x.SelectedCategory, "", new { @class = "text-danger"})
             </div>
             <div class="form-group">
                 <label asp-for="Year" class="control-label"></label>

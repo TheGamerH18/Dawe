@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dawe.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220315084257_Init")]
-    partial class Init
+    [Migration("20220318192607_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -110,18 +110,20 @@ namespace Dawe.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TagId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TagId");
 
                     b.ToTable("Movies");
                 });
 
-            modelBuilder.Entity("Dawe.Models.MovieTags", b =>
+            modelBuilder.Entity("Dawe.Models.MovieTag", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MovieId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Tag")
@@ -130,9 +132,7 @@ namespace Dawe.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MovieId");
-
-                    b.ToTable("Tags");
+                    b.ToTable("MovieTag");
                 });
 
             modelBuilder.Entity("Dawe.Models.Series", b =>
@@ -149,6 +149,9 @@ namespace Dawe.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TagId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<byte[]>("Thumbnail")
                         .IsRequired()
                         .HasColumnType("BLOB");
@@ -159,27 +162,24 @@ namespace Dawe.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TagId");
+
                     b.ToTable("Series");
                 });
 
-            modelBuilder.Entity("Dawe.Models.SeriesTags", b =>
+            modelBuilder.Entity("Dawe.Models.SeriesTag", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Tag")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SeriesId");
-
-                    b.ToTable("SeriesTags");
+                    b.ToTable("SeriesTag");
                 });
 
             modelBuilder.Entity("Dawe.Models.Episode", b =>
@@ -202,26 +202,26 @@ namespace Dawe.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Dawe.Models.MovieTags", b =>
+            modelBuilder.Entity("Dawe.Models.Movies", b =>
                 {
-                    b.HasOne("Dawe.Models.Movies", "Movie")
+                    b.HasOne("Dawe.Models.MovieTag", "Tag")
                         .WithMany()
-                        .HasForeignKey("MovieId")
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Movie");
+                    b.Navigation("Tag");
                 });
 
-            modelBuilder.Entity("Dawe.Models.SeriesTags", b =>
+            modelBuilder.Entity("Dawe.Models.Series", b =>
                 {
-                    b.HasOne("Dawe.Models.Series", "Series")
+                    b.HasOne("Dawe.Models.SeriesTag", "Tag")
                         .WithMany()
-                        .HasForeignKey("SeriesId")
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Series");
+                    b.Navigation("Tag");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,6 +1,7 @@
 ﻿using Dawe.Data;
 using Dawe.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
@@ -33,38 +34,66 @@ namespace Dawe.Controllers
 
         public IActionResult Create()
         {
-            return View();
+            UploadModel model = new();
+            var tags = _context.SeriesTag.ToList();
+            tags.ForEach(x => model.Categorys.Add(new SelectListItem(x.Name, x.Id.ToString())));
+
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UploadModel upload)
         {
-            if(ModelState.IsValid)
+            if (!ModelState.IsValid) return BadRequest();
+            var Tag = await _context.SeriesTag.FindAsync(int.Parse(upload.SelectedCategory));
+            if (Tag == null) return BadRequest("Invalid Category");
+
+            Series series = new()
             {
-                var show = new Series()
-                {
-                    Name = upload.Name,
-                    Description = upload.Description,
-                    Year = upload.Year,
-                    Thumbnail = ConvertCover(upload.CoverFile),
-                };
-                var tags = CreateTags(upload.Tags);
-                SaveTags(tags, show);
+                Name = upload.Name,
+                Tag = Tag,
+                Description = upload.Description,
+                Year = upload.Year,
+                Thumbnail = ConvertCover(upload.CoverFile)
+            };
+            await _context.Series.AddAsync(series);
+            _ = _context.SaveChangesAsync();
 
-                await _context.Series.AddAsync(show);
-                _ = _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
-            }
-            return View(upload);
+            return RedirectToAction(nameof(Index));
         }
 
+        public IActionResult CreateTag()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateTag(CreateTagModel model)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            SeriesTag tag = new()
+            {
+                Name = model.Tag
+            };
+
+            await _context.AddAsync(tag);
+            _ = _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: /Series/Edit/id
         public async Task<IActionResult> Edit(int? id)
         {
+            _context.ChangeTracker.AutoDetectChangesEnabled = true;
+
             if (id == null) return BadRequest();
             var show = await GetShow((int)id);
-
+            if (show == null) return BadRequest();
+            var tags = await _context.SeriesTag.ToListAsync();
+            
             var model = new EditModel()
             {
                 Coverbyte = show.Thumbnail,
@@ -72,13 +101,16 @@ namespace Dawe.Controllers
                 Description = show.Description,
                 Id = show.Id,
                 Year = show.Year,
-                Tags = ListtoString(show.Tags),
+                SelectedCategory = show.Tag.Id.ToString(),
                 Episodes = show.Episodes
             };
+
+            tags.ForEach(tags => model.Categorys.Add(new SelectListItem(tags.Name, tags.Id.ToString())));
+
             return View(model);
         }
 
-        // /Series/AddEpisode
+        // GET: /Series/AddEpisode/id
         public IActionResult AddEpisode(int? id)
         {
             if(id == null) return BadRequest();
@@ -228,11 +260,13 @@ namespace Dawe.Controllers
             {
                 var show = await _context.Series.FindAsync(id);
                 if (show is null) return null;
-                var tags = await _context.SeriesTags.Where(tag => tag.Series == show).Select(tag => tag.Tag).ToListAsync();
-                if (tags.Any())
+                var categories = await _context.SeriesTag.ToListAsync();
+
+                categories.ForEach(x =>
                 {
-                    show.Tags.AddRange(tags);
-                }
+                    if (x.Id == show.Id) show.Tag = x;
+                });
+
                 var episodes = await GetEpisodesAsync(show);
                 if(episodes != null){
                     show.Episodes.AddRange(episodes);
@@ -244,45 +278,12 @@ namespace Dawe.Controllers
 
         public async Task<List<Episode>?> GetEpisodesAsync(Series show)
         {
-            if(_context.Episodes.Any(m => m.show == show))
+            if (_context.Episodes.Any(m => m.show == show))
             {
                 var episodes = _context.Episodes.Where(e => e.show == show).ToListAsync();
                 return await episodes;
             }
             return null;
-        }
-
-
-        private List<string> CreateTags(string Tags)
-        {
-            var taglist = Tags.Split(',').ToList();
-            taglist.ForEach(tag => tag.Trim());
-            return taglist;
-        }
-
-        private async void SaveTags(List<string> tags, Series show)
-        {
-            var taglist = new List<SeriesTags>();
-            foreach (var tag in tags)
-            {
-                taglist.Add(new SeriesTags()
-                {
-                    Tag = tag,
-                    Series = show,
-                });
-            }
-            await _context.SeriesTags.AddRangeAsync(taglist);
-            _ = _context.SaveChangesAsync();
-        }
-        private string ListtoString(List<string> list)
-        {
-            if (list.Count == 0)
-            {
-                _logger.LogWarning("List Empty");
-                return string.Empty;
-            }
-            var newstring = string.Join(", ", list);
-            return newstring;
         }
 
         private byte[] ConvertCover(IFormFile Cover)
@@ -305,7 +306,7 @@ namespace Dawe.Controllers
             }
             // Copy Image to array
             using MemoryStream memoryStream = new MemoryStream();
-            img.SaveAsPng(memoryStream);
+                img.SaveAsPng(memoryStream);
             return memoryStream.ToArray();
         }
 
@@ -314,8 +315,10 @@ namespace Dawe.Controllers
             public string Name { get; set; }
             public string Description { get; set; }
             public IFormFile CoverFile { get; set; }
-            public string Tags { get; set; }
             public string Year { get; set; }
+
+            public string SelectedCategory { get; set; } = "1";
+            public List<SelectListItem> Categorys { get; } = new List<SelectListItem>();
         }
 
         public class EditModel
@@ -325,10 +328,11 @@ namespace Dawe.Controllers
             public string Description { get; set; }
             public byte[] Coverbyte { get; set; }
             public IFormFile Coverfile { get; set; }
-            public string Tags { get; set; }
             public string Year { get; set; }
             public List<Episode> Episodes { get; set; }
 
+            public string SelectedCategory { get; set; } = "1";
+            public List<SelectListItem> Categorys { get; } = new List<SelectListItem>();
         }
 
         public class EpisodeCreateModel
@@ -351,6 +355,11 @@ namespace Dawe.Controllers
             public int Id { get; set; }
             public string Name { get; set; } = string.Empty;
             public int EpisodeNumber { get; set; }
+        }
+
+        public class CreateTagModel
+        {
+            public string Tag { get; set; }
         }
     }
 }

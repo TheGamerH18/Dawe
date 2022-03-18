@@ -18,10 +18,7 @@
             <div class="card-body">
                 <h5 class="card-title">@Html.DisplayFor(modelitem => item.Name)</h5>
                 <p class="card-text">
-                    @foreach(var tag in item.Tags)
-                    {
-                        @Html.DisplayFor(tagitem => tag)
-                    }
+                    @Html.DisplayFor(x => item.Tag.Name)
                 </p>
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>

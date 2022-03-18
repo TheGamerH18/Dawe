@@ -14,9 +14,17 @@ namespace Dawe.Models
         public byte[] Cover { get; set; }
         public string Name { get; set; } = string.Empty;
 
-        [NotMapped]
-        public List<string> Tags { get; } = new();
+        public MovieTag Tag { get; set; }
 
         public string ReleaseDate { get; set; }
+    }
+
+    public class MovieTag
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public string Tag { get; set; }
     }
 }

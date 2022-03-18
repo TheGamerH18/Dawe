@@ -1,0 +1,22 @@
+﻿@model Dawe.Controllers.MoviesController.CreateTagModel
+@{
+    ViewData["Title"] = "Create Movie";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<div class="row">
+    <div class="col-4">
+        <form asp-action="CreateTag">
+            <div class="form-floating mb-3">
+                <input asp-for="Tag" placeholder="Tag" />
+                <label asp-for="Tag"></label>
+            </div>
+            <div class="form-group">
+                <input id="submitbtn" type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

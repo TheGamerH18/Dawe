@@ -5,6 +5,7 @@ using Dawe.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using Dawe.Data;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Dawe.Controllers
 {
@@ -24,13 +25,10 @@ namespace Dawe.Controllers
         // GET: Movies
         public async Task<IActionResult> Index()
         {
+            _context.ChangeTracker.AutoDetectChangesEnabled = true;
             var movies = await _context.Movies.ToListAsync();
-            foreach (var movie in movies)
-            {
-                var tags = await _context.Tags.Where(p => p.Movie == movie).Select(p => p.Tag).ToListAsync();
-                movie.Tags.AddRange(tags);
-            }
-            movies.ForEach(mov => mov.Tags.ForEach(tags => _logger.LogInformation("Add Tag" + tags)));
+            var tags = await _context.MovieTag.ToListAsync();
+
             return View(movies);
         }
 
@@ -54,9 +52,57 @@ namespace Dawe.Controllers
         // GET: Movies/Create
         public IActionResult Create()
         {
+            var tags = _context.MovieTag.ToList();
+            UploadModel model = new();
+            tags.ForEach(t => model.Categories.Add(new SelectListItem(t.Tag, t.Id.ToString())));
+            return View(model);
+        }
+        
+        // GET: /Movies/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(UploadModel model)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            var tag = await _context.MovieTag.FindAsync(int.Parse(model.SelectedCategory));
+
+            Movies movie = new()
+            {
+                Name = model.Name,
+                MoviePath = model.MoviePath,
+                Cover = ConvertCover(model.CoverFile),
+                Tag = tag,
+                ReleaseDate = model.Date
+            };
+
+            await _context.Movies.AddAsync(movie);
+            _ = _context.SaveChangesAsync();
+            
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult CreateTag()
+        {
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateTag(CreateTagModel model)
+        {
+            if(!ModelState.IsValid) return BadRequest();
+            MovieTag tag = new()
+            {
+                Tag = model.Tag,
+            };
+
+            await _context.AddAsync(tag);
+            _ = _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: /Movies/Movie/Id
         public async Task<IActionResult> Movie(int? id)
         {
             if(id == null) return BadRequest();
@@ -66,44 +112,6 @@ namespace Dawe.Controllers
             var content = System.IO.File.OpenRead(path);
 
             return File(content, "video/mp4", enableRangeProcessing: true);
-        }
-
-        // POST: Movies/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(UploadModel upload)
-        {
-            if(ModelState.IsValid)
-            {
-                // Save to model
-                var movie = new Movies()
-                {
-                    Name = upload.Name,
-                    MoviePath = upload.MoviePath,
-                    ReleaseDate = upload.Date,
-                    Cover = ConvertCover(upload.CoverFile),
-                };
-
-                // Save Tags
-                var list = upload.Tags.Split(',').ToList();
-                foreach (var stringtag in list)
-                {
-                    var tag = new MovieTags()
-                    {
-                        Movie = movie,
-                        Tag = stringtag
-                    };
-                    _context.Add(tag);
-                }
-
-                _context.Add(movie);
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("Uploaded Movie " + movie.Name);
-                return RedirectToAction(nameof(Index));
-            }
-            return View(upload);
         }
 
         // Post: Movies/Upload
@@ -148,7 +156,6 @@ namespace Dawe.Controllers
                 Name = movies.Name,
                 Coverbyte = movies.Cover,
                 Date = movies.ReleaseDate,
-                Tags = ListtoString(movies.Tags)
             };
             if (movies == null)
             {
@@ -171,9 +178,6 @@ namespace Dawe.Controllers
                     var movie = await GetMovie(id);
                     if (movie != null)
                     {
-                        // Delete Tags and Create Tags
-                        DeleteTags(movie);
-                        SaveTags(model.Tags, movie);
                         // Modify Movie
                         movie.Name = model.Name;
                         movie.ReleaseDate = model.Date;
@@ -221,7 +225,6 @@ namespace Dawe.Controllers
             var movies = await _context.Movies.FindAsync(id);
             if (movies is null) return BadRequest();
             _context.Movies.Remove(movies);
-            DeleteTags(movies);
             _ = _context.SaveChangesAsync();
 
             IFileHelper.DeleteFile(movies.MoviePath, _hostingEnvironment.WebRootPath);
@@ -240,11 +243,11 @@ namespace Dawe.Controllers
         /// <returns>The movie or null if no movie was found</returns>
         private async Task<Movies> GetMovie(int id)
         {
+            _context.ChangeTracker.AutoDetectChangesEnabled = true;
             if (_context.Movies.Any(m => m.Id == id))
             {
                 var movie = await _context.Movies.FindAsync(id);
-                var tags = await _context.Tags.Where(tag => tag.Movie == movie).Select(tag => tag.Tag).ToListAsync();
-                movie.Tags.AddRange(tags);
+                var tags = await _context.MovieTag.FindAsync(movie.Tag);
                 return movie;
             }
             else
@@ -253,68 +256,6 @@ namespace Dawe.Controllers
             }
         }
 
-        /// <summary>
-        /// Reformates a List to a single string. Every Value is seperated with a ','
-        /// </summary>
-        /// <param name="list">List, that needs to be converted</param>
-        /// <returns>Formated string</returns>
-        private string ListtoString(List<string> list)
-        {
-            if (list.Count == 0)
-            {
-                _logger.LogWarning("List Empty");
-                return null;
-            }
-            var newstring = string.Join(", ", list);
-            return newstring;
-        }
-
-        /// <summary>
-        /// Saves Tags to Database
-        /// </summary>
-        /// <param name="tags">String containing the tags, each seperated with ','</param>
-        /// <param name="movie">Movie which is next to the tags</param>
-        private async void SaveTags(string tags, Movies movie)
-        {
-            var list = CreateTags(tags, movie);
-            await _context.AddRangeAsync(list);
-            await _context.SaveChangesAsync();
-        }
-
-        /// <summary>
-        /// Splits the tag string and creates new Tags objects and puts them in a list.
-        /// </summary>
-        /// <param name="tags">String containing the tags, each separeted with ','</param>
-        /// <param name="movie">Movie which is next to the tags</param>
-        /// <returns>List Containing all detected Tags</returns>
-        private List<MovieTags> CreateTags(string tags, Movies movie)
-        {
-            var tagsList = new List<MovieTags>();
-            var list = tags.Split(',').ToList();
-            foreach (var stringtag in list)
-            {
-                var trimedtag = stringtag.Trim();
-                var tag = new MovieTags()
-                {
-                    Movie = movie,
-                    Tag = trimedtag
-                };
-                tagsList.Add(tag);
-            }
-            return tagsList;
-        }
-
-        /// <summary>
-        /// Deletes all tags, that are belonging to the movie
-        /// </summary>
-        /// <param name="movie">Movie that owns the tags</param>
-        private async void DeleteTags(Movies movie)
-        {
-            var tags = _context.Tags.Where(tags => tags.Movie == movie).ToListAsync();
-            _context.RemoveRange(tags.Result);
-            await _context.SaveChangesAsync();
-        }
-        
         /// <summary>
         /// Converts an IFormFile to Image, resizes it, and copies it to an byte array
         /// </summary>
@@ -342,6 +283,11 @@ namespace Dawe.Controllers
                 img.SaveAsPng(memoryStream);
             return memoryStream.ToArray();
         }
+
+        public class CreateTagModel
+        {
+            public string Tag { get; set; }
+        }
     }
 
     public class UploadModel
@@ -350,8 +296,10 @@ namespace Dawe.Controllers
         public IFormFile CoverFile { get; set; }
         public string MoviePath { get; set; }
         public string Name { get; set; }
-        public string Tags  { get; set; }
         public string Date { get; set; }
+
+        public string SelectedCategory { get; set; } = "1";
+        public List<SelectListItem> Categories { get; } = new();
     }
 
     public class EditModel
@@ -361,7 +309,9 @@ namespace Dawe.Controllers
         [BindProperty]
         public IFormFile CoverFile { get; set; }
         public string Name { get; set; }
-        public string Tags { get; set; }
         public string Date { get; set; }
+
+        public string SelectedCategory { get; set; } = "1";
+        public List<SelectListItem> Categories { get; } = new();
     }
 }
