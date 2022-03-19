@@ -23,12 +23,10 @@ namespace Dawe.Controllers
  
         public async Task<IActionResult> Index()
         {
-            var shows = await _context.Series.Select(s => s.Id).ToListAsync();
+            var shows = await _context.Series.ToListAsync();
+            _ = await _context.SeriesTag.ToListAsync();
             List<Series> result = new();
-            foreach(var id in shows)
-            {
-                result.Add(await GetShow(id));
-            }
+            result.AddRange(shows);
             return View(result);
         }
 

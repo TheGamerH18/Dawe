@@ -22,29 +22,21 @@ namespace Dawe.Controllers
             _logger = logger;
         }
 
-        // GET: Movies
+        // GET: /Movies
         public async Task<IActionResult> Index()
         {
-            _context.ChangeTracker.AutoDetectChangesEnabled = true;
             var movies = await _context.Movies.ToListAsync();
-            var tags = await _context.MovieTag.ToListAsync();
-
+            _ = await _context.MovieTag.ToListAsync();
             return View(movies);
         }
 
-        // GET: Movies/Details/5
+        // GET: /Movies/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return BadRequest();
 
             var movies = await GetMovie((int)id);
-            if (movies == null)
-            {
-                return NotFound();
-            }
+            if (movies == null) return NotFound();
 
             return View(movies);
         }
@@ -58,7 +50,7 @@ namespace Dawe.Controllers
             return View(model);
         }
         
-        // GET: /Movies/Create
+        // POST: /Movies/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UploadModel model)
@@ -81,11 +73,13 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: /Movies/CreateTag
         public IActionResult CreateTag()
         {
             return View();
         }
 
+        // POST: /Movies/CreateTag
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTag(CreateTagModel model)
@@ -143,60 +137,45 @@ namespace Dawe.Controllers
         // GET: Movies/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if(id == null) return BadRequest();
+            
+            var movie = await _context.Movies.FindAsync(id);
+            if (movie == null) return NotFound();
 
-            var movies = await GetMovie((int)id);
-            if(movies == null) return NoContent();
-            var editmodel = new EditModel()
+            _ = _context.MovieTag.ToListAsync();
+            
+            EditModel model = new()
             {
-                id = movies.Id,
-                Name = movies.Name,
-                Coverbyte = movies.Cover,
-                Date = movies.ReleaseDate,
+                id = movie.Id,
+                Name = movie.Name,
+                Coverbyte = movie.Cover,
+                SelectedCategory = movie.Tag.Id.ToString(),
+                Date = movie.ReleaseDate
             };
-            if (movies == null)
-            {
-                return NotFound();
-            }
-            return View(editmodel);
+            return View(model);
         }
 
         // POST: Movies/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, EditModel model)
+        public async Task<IActionResult> Edit(EditModel model)
         {
-            if (ModelState.IsValid)
+            if(!ModelState.IsValid) return BadRequest();
+            var movie = await _context.Movies.FindAsync(model.id);
+            if (movie == null) return BadRequest();
+            var tags = await _context.MovieTag.ToListAsync();
+
+            if(model.CoverFile != null)
             {
-                if(id == model.id)
-                {
-                    var movie = await GetMovie(id);
-                    if (movie != null)
-                    {
-                        // Modify Movie
-                        movie.Name = model.Name;
-                        movie.ReleaseDate = model.Date;
-                        if(model.CoverFile != null) { movie.Cover = ConvertCover(model.CoverFile); }
-                        // Save to DB
-                        _context.Update(movie);
-                        await _context.SaveChangesAsync();
-                        return View(model);
-                    }
-                    else
-                    {
-                        return BadRequest();
-                    }
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                movie.Cover = ConvertCover(model.CoverFile);
             }
+
+            movie.Name = model.Name;
+            movie.ReleaseDate = model.Date;
+            movie.Tag = tags.Find(x => x.Id == int.Parse(model.SelectedCategory));
+
+            _context.Movies.Update(movie);
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -243,17 +222,9 @@ namespace Dawe.Controllers
         /// <returns>The movie or null if no movie was found</returns>
         private async Task<Movies> GetMovie(int id)
         {
-            _context.ChangeTracker.AutoDetectChangesEnabled = true;
-            if (_context.Movies.Any(m => m.Id == id))
-            {
-                var movie = await _context.Movies.FindAsync(id);
-                var tags = await _context.MovieTag.FindAsync(movie.Tag);
-                return movie;
-            }
-            else
-            {
-                return null;
-            }
+            var movie = await _context.Movies.FindAsync(id);
+            _ = _context.MovieTag.ToListAsync();
+            return movie;
         }
 
         /// <summary>
