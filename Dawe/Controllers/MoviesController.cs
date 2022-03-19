@@ -158,7 +158,7 @@ namespace Dawe.Controllers
             return View(model);
         }
 
-        // POST: Movies/Edit/5
+        // POST: Movies/Edit/
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditModel model)
