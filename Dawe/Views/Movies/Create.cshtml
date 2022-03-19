@@ -24,7 +24,7 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                @Html.DropDownListFor(x => x.SelectedCategory, new SelectList(Model.Categories, "Value", "Text"), htmlAttributes: new { @case = "form-select", id = "Category"})
+                @Html.DropDownListFor(x => x.SelectedCategory, new SelectList(Model.Categories, "Value", "Text"), htmlAttributes: new { @class = "form-select", id = "Category"})
                 <label for="Category">category</label>
                 @Html.ValidationMessageFor(x => x.SelectedCategory, "", new { @class = "text-danger"})
             </div>
