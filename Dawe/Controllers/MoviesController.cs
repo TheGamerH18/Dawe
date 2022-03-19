@@ -142,7 +142,7 @@ namespace Dawe.Controllers
             var movie = await _context.Movies.FindAsync(id);
             if (movie == null) return NotFound();
 
-            _ = _context.MovieTag.ToListAsync();
+            var tags = await _context.MovieTag.ToListAsync();
             
             EditModel model = new()
             {
@@ -152,6 +152,9 @@ namespace Dawe.Controllers
                 SelectedCategory = movie.Tag.Id.ToString(),
                 Date = movie.ReleaseDate
             };
+
+            tags.ForEach(x => model.Categories.Add(new SelectListItem(x.Tag, x.Id.ToString())));
+
             return View(model);
         }
 
@@ -163,7 +166,6 @@ namespace Dawe.Controllers
             if(!ModelState.IsValid) return BadRequest();
             var movie = await _context.Movies.FindAsync(model.id);
             if (movie == null) return BadRequest();
-            var tags = await _context.MovieTag.ToListAsync();
 
             if(model.CoverFile != null)
             {
@@ -172,9 +174,10 @@ namespace Dawe.Controllers
 
             movie.Name = model.Name;
             movie.ReleaseDate = model.Date;
-            movie.Tag = tags.Find(x => x.Id == int.Parse(model.SelectedCategory));
+            movie.Tag = await _context.MovieTag.FindAsync(int.Parse(model.SelectedCategory));
 
             _context.Movies.Update(movie);
+            _ = _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
