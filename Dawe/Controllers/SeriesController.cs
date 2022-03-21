@@ -112,9 +112,12 @@ namespace Dawe.Controllers
         public IActionResult AddEpisode(int? id)
         {
             if(id == null) return BadRequest();
+            var episodesofshow = _context.Episodes.Where(x => x.show.Id == (int)id).ToList();
+            int cnumber = episodesofshow.Count() + 1;
             EpisodeCreateModel model = new()
             {
-                showid = (int)id
+                showid = (int)id,
+                EpisodeNumber = cnumber
             };
             return View(model);
         }
