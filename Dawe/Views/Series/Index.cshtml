@@ -10,10 +10,28 @@
     <a asp-action="Create">Create New</a>
 </p>
 
+<div id="confirmmodal" class="modal fade" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ModalItemName"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmtext">Do you really want to delete this Element?</p>
+                <p id="confirmid" hidden></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="deleteconfirmed()">Confirm Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="d-flex flex-wrap justify-content-center">
     @foreach(var item in Model)
     {
-        <div class="card m-2">
+        <div class="card m-2" style="max-width: 300px">
             <img src="data:image/*;base64,@(Convert.ToBase64String(item.Thumbnail))" />
             <div class="card-body">
                 <h5 class="card-title">@Html.DisplayFor(modelitem => item.Name)</h5>
@@ -22,8 +40,26 @@
                 </p>
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a data-bs-id="@item.Id" data-bs-toggle="modal" data-bs-target="#confirmmodal">Delete</a>
             </div>
         </div>
     }
 </div>
+
+@section Scripts{
+    <script>
+        var modal = $("#confirmmodal").get(0);
+        modal.addEventListener('show.bs.modal', function(event) {
+            var triggerbutton = event.relatedTarget;
+            var id = triggerbutton.getAttribute('data-bs-id');
+            $('#confirmid').text(id);
+        });
+
+        function deleteconfirmed() {
+            var id = $('#confirmid').text();
+            $.post("/Series/Delete/"+id, function(event){
+                window.location.reload();
+            });
+        }
+    </script>
+}

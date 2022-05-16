@@ -16,11 +16,11 @@ namespace Dawe.Models
         public List<Episode> Episodes { get; set; } = new();
     }
 
-        public class SeriesTag
-        {
-            [Key]
-            public int Id { get; set; }
-            [Required]
-            public string Name { get; set; }
-        }
+    public class SeriesTag
+    {
+        [Key]
+        public int Id { get; set; }
+        [Required]
+        public string Name { get; set; }
+    }
 }

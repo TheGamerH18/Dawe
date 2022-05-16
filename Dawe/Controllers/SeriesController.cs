@@ -108,6 +108,23 @@ namespace Dawe.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if(id == null) return BadRequest();
+            var show = await GetShow((int)id);
+            if(show == null) return NotFound();
+
+            foreach(var item in show.Episodes)
+            {
+                _context.Remove(item);
+            }
+            _context.Remove(show);
+            _ = _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
         // GET: /Series/AddEpisode/id
         public IActionResult AddEpisode(int? id)
         {
