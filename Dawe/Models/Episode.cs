@@ -8,7 +8,7 @@ namespace Dawe.Models
         public int episodeId { get; set; }
         public int episodeNumber { get; set; }
         [Required]
-        public Series show { get; set; }
+        public Season season { get; set; }
         public string name { get; set; }
         public string EpisodePath { get; set; }
     }

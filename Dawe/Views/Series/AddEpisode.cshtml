@@ -10,7 +10,7 @@
     <div class="col-lg-5">
         <form asp-action="AddEpisode" class="bg-light shadow border rounded-3 p-3">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input hidden asp-for="showid" />
+            <input hidden asp-for="seasonid" />
             <input hidden id="epath" asp-for="Path" />
             <div class="form-floating mb-3">
                 <input asp-for="EpisodeNumber" class="form-control" />
@@ -26,18 +26,20 @@
         </form>
     </div>
     <div class="col-lg-7">
-        <form id="fileform" class="border rounded-3 p-3 bg-light shadow" enctype="multipart/form-data" >
-            <div class="form-group mb-3">
-                <input id="files" class="form-control" name="files" type="file" size="1" />
-            </div>
-            <div class="progress mb-3">
-                <div id="uploadprogress" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-aria-valuemin="0" aria-aria-valuemax="100"></div>
-            </div>
-            <div class="mb-3">
-                <button id="uploadbtn" onclick="uploadFiles('files');" class="btn btn-primary">Upload</button>
+        <div class="border rounded-3 p-3 bg-light shadow">
+            <form id="fileform" method="post"  enctype="multipart/form-data" >
+                <div class="form-group mb-3">
+                    <input id="files" class="form-control" name="files" type="file" size="1" />
+                </div>
+                <div class="progress mb-3">
+                    <div id="uploadprogress" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-aria-valuemin="0" aria-aria-valuemax="100"></div>
+                </div>
+            </form>
+            <div>
+                <p id="uploadbtn" onclick="uploadFiles('files');" class="btn btn-primary mb-0">Upload</p>
             </div>
             <div id="uploadAlert"></div>
-        </form>
+        </div>
     </div>
 </div>
 @section Scripts{
@@ -49,34 +51,32 @@
             var files = input.files;
             var formData = new FormData();
                 formData.append("files", files[0]);
-            $.ajax(
-                {
-                    xhr: function() {
-                        var xhr = new window.XMLHttpRequest();
-                        xhr.upload.addEventListener('progress', function(event) {
-                            if(event.lengthComputable) {
-                                var percent = event.loaded / event.total * 100;
-                                $('#uploadprogress').width(percent+'%').attr('aria-valuenow', percent);
-                            }
-                        });
-                        return xhr;
-                    },
-                    url: "/Series/Upload",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    type: "POST",
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        showalert("Error in Upload " + textStatus + " | " + errorThrown, "warning", "#UploadAlert");
-                    },
-                    success: function(data) {
-                        $("#epath").val(data);
-                        showalert("Upload Succesfull", "success", "#uploadAlert");
-                        $("#uploadbtn").toggleClass("btn-primary btn-success");
-                        $("#createbtn").prop('disabled', false);
-                    }
+            $.ajax({
+                xhr: function() {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function(event) {
+                        if(event.lengthComputable) {
+                            var percent = event.loaded / event.total * 100;
+                            $('#uploadprogress').width(percent+'%').attr('aria-valuenow', percent);
+                        }
+                    });
+                    return xhr;
+                },
+                url: "/Series/Upload",
+                data: formData,
+                processData: false,
+                contentType: false,
+                type: "POST",
+                error: function(jqXHR, textStatus, errorThrown) {
+                    showalert("Error in Upload " + textStatus + " | " + errorThrown, "warning", "#UploadAlert");
+                },
+                success: function(data) {
+                    $("#epath").val(data);
+                    showalert("Upload Succesfull", "success", "#uploadAlert");
+                    $("#uploadbtn").toggleClass("btn-primary btn-success");
+                    $("#createbtn").prop('disabled', false);
                 }
-            );
+            });
         }
 
         function showalert(message, type, placeholder) {

@@ -43,7 +43,8 @@
 
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary me-2" />
-                <a href="/Series" class="btn btn-secondary">Cancel</a>
+                <a href="/Series" class="btn btn-secondary me-2">Cancel</a>
+                <button onclick="newSeason()" class="btn-primary btn">New Season</button>
             </div>
         </form>
     </div>
@@ -53,32 +54,74 @@
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-lg-10">
-        <div class="border rounded-3 p-3 bg-light shadow">
-            <div class="mb-3 d-flex">
-                <h3 class="mb-0 me-3">Episoden: </h3>
-                <a asp-action="AddEpisode" asp-route-id="@Model.Id" class="btn btn-primary">Add Episode</a>
-            </div>
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach(var item in Model.Episodes)
-                    {
+<div class="btn-group" role="group" id="buttongroup">
+    @foreach(var season in Model.Seasons)
+    {
+        <button type="button" class="btn btn-primary" onclick="showseason('@season.Seasonnumber')">@season.Seasonnumber</button>
+    }
+</div>
+<div id="seasontables">
+    @foreach(var season in Model.Seasons)
+    {
+    <div class="row mb-3" id="season-@season.Seasonnumber" hidden>
+        <div class="col-lg-10">
+            <div class="border rounded-3 p-3 bg-light shadow">
+                <div class="mb-3 d-flex">
+                    <h3 class="mb-0 me-3">Season @season.Seasonnumber </h3>
+                </div>
+
+                <table class="table table-hover">
+                    <thead>
                         <tr>
-                            <td>@Html.DisplayFor(x => item.episodeNumber)</td>
-                            <td>@Html.DisplayFor(x => item.name)</td>
-                            <td><a asp-action="EditEpisode" asp-route-id="@item.episodeId">Edit</a></td>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach(var episode in season.Episodes)
+                        {
+                            <tr style="cursor: pointer;" onclick="window.location.href = '/Series/WatchEpisode/@episode.episodeId'">
+                                <th scope="row">@Html.DisplayFor(number => episode.episodeNumber)</th>
+                                <td>@Html.DisplayFor(number => episode.name)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <a asp-action="AddEpisode" asp-route-id="@season.Id" class="btn btn-primary">Add Episode</a>
+            </div>
         </div>
     </div>
+    }
 </div>
+
+@section Scripts{
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function hideelements() {
+            document.getElementById("seasontables").querySelectorAll(".row").forEach(function(elem) {elem.hidden=true})
+        }
+
+        function newSeason() {
+            $.ajax({
+                url: "/Series/AddSeason",
+                type: "POST",
+                data: {"id": @Model.Id},
+                success: function(data) {
+                    console.log("success")
+                }
+            });
+        }
+
+        function showseason(seasonnumber) {
+            hideelements();
+            var table = document.getElementById("season-"+seasonnumber);
+            table.hidden=false
+        }
+
+
+        $(document).ready(function() {
+            hideelements();
+        })
+    </script>
+}

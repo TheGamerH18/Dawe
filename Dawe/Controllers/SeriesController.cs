@@ -30,6 +30,7 @@ namespace Dawe.Controllers
             return View(result);
         }
 
+        // GET: /Series/Create
         public IActionResult Create()
         {
             UploadModel model = new();
@@ -39,6 +40,7 @@ namespace Dawe.Controllers
             return View(model);
         }
 
+        // POST: /Series/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UploadModel upload)
@@ -61,11 +63,13 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: /Series/CreateTag
         public IActionResult CreateTag()
         {
             return View();
         }
 
+        // POST: /Series/CreateTag
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTag(CreateTagModel model)
@@ -100,7 +104,7 @@ namespace Dawe.Controllers
                 Id = show.Id,
                 Year = show.Year,
                 SelectedCategory = show.Tag.Id.ToString(),
-                Episodes = show.Episodes
+                Seasons = show.Seasons
             };
 
             tags.ForEach(tags => model.Categorys.Add(new SelectListItem(tags.Name, tags.Id.ToString())));
@@ -111,6 +115,7 @@ namespace Dawe.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
+            /*
             if(id == null) return BadRequest();
             var show = await GetShow((int)id);
             if(show == null) return NotFound();
@@ -123,17 +128,39 @@ namespace Dawe.Controllers
             _ = _context.SaveChangesAsync();
 
             return Ok();
+            */
+            return BadRequest();
+        }
+
+        // POST: /Series/AddSeason
+        [HttpPost]
+        public async Task<IActionResult> AddSeason(int? id)
+        {
+            if(id is null) return BadRequest();
+            var series = await GetShow((int)id);
+            if (series == null) return BadRequest();
+
+            Season season = new()
+            {
+                Series = series,
+                Seasonnumber = series.Seasons.Count() + 1,
+            };
+
+            await _context.Seasons.AddAsync(season);
+            _ = _context.SaveChangesAsync();
+
+            return Ok();
         }
 
         // GET: /Series/AddEpisode/id
         public IActionResult AddEpisode(int? id)
         {
             if(id == null) return BadRequest();
-            var episodesofshow = _context.Episodes.Where(x => x.show.Id == (int)id).ToList();
+            var episodesofshow = _context.Episodes.Where(x => x.season.Id == (int)id).ToList();
             int cnumber = episodesofshow.Count() + 1;
             EpisodeCreateModel model = new()
             {
-                showid = (int)id,
+                seasonid = (int)id,
                 EpisodeNumber = cnumber
             };
             return View(model);
@@ -145,21 +172,23 @@ namespace Dawe.Controllers
         public async Task<IActionResult> AddEpisode(EpisodeCreateModel model)
         {
             if(!ModelState.IsValid) return BadRequest();
-            var show = await GetShow(model.showid);
-            if(show is null) return BadRequest();
+            var season = await _context.Seasons.FindAsync(model.seasonid);
+            if(season is null) return BadRequest();
 
             Episode episode = new()
             {
                 name = model.name,
                 EpisodePath = model.Path,
                 episodeNumber = model.EpisodeNumber,
-                show = show
+                season = season
             };
             await _context.Episodes.AddAsync(episode);
             _ = _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Edit), new { id = model.showid });
+            _ = await _context.Series.ToListAsync();
+            return RedirectToAction(nameof(Edit), new { id = season.Series.Id });
         }
 
+        // GET: /Series/EditEpisode
         public IActionResult EditEpisode(int? id)
         {
             if(id == null) return BadRequest();
@@ -225,7 +254,7 @@ namespace Dawe.Controllers
             var path = IFileHelper.GetPathAndFilename(episode.EpisodePath, _environment.WebRootPath);
             var content = System.IO.File.OpenRead(path);
 
-            return File(content, DataValidation.GetEnumDescription(Data.FileType.MP4), enableRangeProcessing: true);
+            return File(content, DataValidation.GetEnumDescription(FileType.MP4), enableRangeProcessing: true);
         }
 
         // Series/Upload
@@ -276,30 +305,34 @@ namespace Dawe.Controllers
         {
             if(_context.Series.Any(m => m.Id == id))
             {
+                // Get basic series
                 var show = await _context.Series.FindAsync(id);
                 if (show is null) return null;
+                // Add category to series
                 var categories = await _context.SeriesTag.ToListAsync();
 
                 categories.ForEach(x =>
                 {
                     if (x.Id == show.Id) show.Tag = x;
                 });
+                // Add Season to show
+                _ = _context.Seasons.ToListAsync();
+                var seasons = await _context.Seasons.Where(x => x.Series.Id == show.Id).ToListAsync();
+                seasons.ForEach(async x =>
+                {
+                    // Add Episodes to Season
+                    var episodes = await _context.Episodes.OrderBy(x => x.episodeNumber).ToListAsync();
+                    episodes.ForEach(y =>
+                    {
+                        if(y.season.Id == x.Id)
+                        {
+                            x.Episodes.Add(y);
+                        }
+                    });
+                    show.Seasons.Add(x);
+                });
 
-                var episodes = await GetEpisodesAsync(show);
-                if(episodes != null){
-                    show.Episodes.AddRange(episodes);
-                }
                 return show;
-            }
-            return null;
-        }
-
-        public async Task<List<Episode>?> GetEpisodesAsync(Series show)
-        {
-            if (_context.Episodes.Any(m => m.show == show))
-            {
-                var episodes = _context.Episodes.Where(e => e.show == show).ToListAsync();
-                return await episodes;
             }
             return null;
         }
@@ -347,7 +380,7 @@ namespace Dawe.Controllers
             public byte[] Coverbyte { get; set; }
             public IFormFile Coverfile { get; set; }
             public string Year { get; set; }
-            public List<Episode> Episodes { get; set; }
+            public List<Season> Seasons { get; set; }
 
             public string SelectedCategory { get; set; } = "1";
             public List<SelectListItem> Categorys { get; } = new List<SelectListItem>();
@@ -355,7 +388,7 @@ namespace Dawe.Controllers
 
         public class EpisodeCreateModel
         {
-            public int showid { get; set; }
+            public int seasonid { get; set; }
             public string Path { get; set; }
             public string name { get; set; }
             public int EpisodeNumber { get; set; }

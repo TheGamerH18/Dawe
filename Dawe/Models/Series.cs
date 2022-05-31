@@ -13,6 +13,16 @@ namespace Dawe.Models
         public byte[] Thumbnail { get; set; }
         public SeriesTag Tag { get; set; } = new();
         [NotMapped]
+        public List<Season> Seasons { get; set; } = new();
+    }
+
+    public class Season
+    {
+        [Key]
+        public int Id { get; set; }
+        public Series Series { get; set; }
+        public int Seasonnumber { get; set; }
+        [NotMapped]
         public List<Episode> Episodes { get; set; } = new();
     }
 
