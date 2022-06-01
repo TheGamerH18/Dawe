@@ -28,6 +28,7 @@
     <div class="col-lg-7">
         <div class="border rounded-3 p-3 bg-light shadow">
             <form id="fileform" method="post"  enctype="multipart/form-data" >
+                @Html.AntiForgeryToken()
                 <div class="form-group mb-3">
                     <input id="files" class="form-control" name="files" type="file" size="1" />
                 </div>
@@ -49,8 +50,10 @@
         function uploadFiles(inputId) {
             var input  = document.getElementById(inputId);
             var files = input.files;
+            var token = $('input[name="__RequestVerificationToken"]', $("#fileform")).val()
             var formData = new FormData();
                 formData.append("files", files[0]);
+                formData.append("__RequestVerificationToken", token);
             $.ajax({
                 xhr: function() {
                     var xhr = new window.XMLHttpRequest();

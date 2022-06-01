@@ -86,7 +86,7 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Series/Edit/id
+        // GET: /Series/Edit/
         public async Task<IActionResult> Edit(int? id)
         {
             _context.ChangeTracker.AutoDetectChangesEnabled = true;
@@ -112,28 +112,28 @@ namespace Dawe.Controllers
             return View(model);
         }
 
+        // POST: /Series/Delete/
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int? id)
         {
-            /*
-            if(id == null) return BadRequest();
-            var show = await GetShow((int)id);
-            if(show == null) return NotFound();
+            if(id is null) return BadRequest();
+            var series = await GetShow((int)id);
+            if (series is null) return NotFound();
 
-            foreach(var item in show.Episodes)
+            series.Seasons.ForEach(x =>
             {
-                _context.Remove(item);
-            }
-            _context.Remove(show);
-            _ = _context.SaveChangesAsync();
+                _context.RemoveRange(x.Episodes);
+                _context.Remove(x);
+            });
+            _context.Remove(series);
 
             return Ok();
-            */
-            return BadRequest();
         }
 
         // POST: /Series/AddSeason
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddSeason(int? id)
         {
             if(id is null) return BadRequest();
@@ -147,6 +147,26 @@ namespace Dawe.Controllers
             };
 
             await _context.Seasons.AddAsync(season);
+            _ = _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        // POST: /Series/RemoveSeason
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveSeason(int? id)
+        {
+            if(id is null) return BadRequest();
+            var season = await _context.Seasons.FindAsync(id);
+            if(season is null) return BadRequest();
+
+            _context.Episodes.Where(x => x.season == season).ToListAsync().Result.ForEach(x =>
+            {
+                IFileHelper.DeleteFile(x.EpisodePath, _environment.WebRootPath);
+                _context.Remove(x);
+            });
+            _context.Remove(season);
             _ = _context.SaveChangesAsync();
 
             return Ok();
@@ -203,6 +223,7 @@ namespace Dawe.Controllers
             return View(model);
         }
 
+        // POST: /Series/EditEpisode
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EditEpisode(EpisodeEditModel model)
@@ -218,6 +239,7 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // POST: /Series/DeleteEpisode
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteEpisode(int? id)
@@ -263,6 +285,7 @@ namespace Dawe.Controllers
         [DisableRequestSizeLimit,
         RequestFormLimits(MultipartBodyLengthLimit = int.MaxValue,
         ValueLengthLimit = int.MaxValue)]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile files)
         {
             if(files is null) return BadRequest();
