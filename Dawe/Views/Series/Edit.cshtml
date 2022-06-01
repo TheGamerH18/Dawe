@@ -6,7 +6,7 @@
 
 <h1>@ViewData["Title"]</h1>
 <hr class="mt-3 mb-5" />
-<div class="row mb-4">
+<div class="row">
     <div class="col-lg-8 mb-4">
         <form asp-action="Edit" class="shadow bg-light border rounded-3 p-3">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -54,11 +54,16 @@
         </div>
     </div>
 </div>
-<div class="btn-group" role="group" id="buttongroup">
-    @foreach(var season in Model.Seasons)
-    {
-        <button type="button" class="btn btn-primary" onclick="showseason('@season.Seasonnumber')">@season.Seasonnumber</button>
-    }
+<hr class="mt-3 mb-4" />
+
+<div class="d-flex mb-3 align-items-center">
+    <h4 class="me-3 mb-0">Season:</h4>
+    <div class="btn-group" role="group" id="buttongroup">
+        @foreach(var season in Model.Seasons)
+        {
+            <button type="button" class="btn btn-primary" onclick="showseason('@season.Seasonnumber')">@season.Seasonnumber</button>
+        }
+    </div>
 </div>
 <div id="seasontables">
     @foreach(var season in Model.Seasons)
@@ -71,12 +76,6 @@
                 </div>
 
                 <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Name</th>
-                        </tr>
-                    </thead>
                     <tbody>
                         @foreach(var episode in season.Episodes)
                         {
