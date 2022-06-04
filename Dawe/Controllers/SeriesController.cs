@@ -186,12 +186,30 @@ namespace Dawe.Controllers
             return View(model);
         }
 
+        //GET: /Series/GetEpisode
+        [HttpGet]
+        public async Task<IActionResult> GetEpisode(int? id)
+        {
+            if (id is null) return BadRequest();
+            var episode = await _context.Episodes.FindAsync(id);
+            if (episode is null) return NotFound();
+
+            EpisodeEditModel model = new()
+            {
+                id = episode.episodeId,
+                Name = episode.name,
+                EpisodeNumber = episode.episodeNumber
+            };
+
+            return Ok(model);
+        }
+
         // POST: /Series/AddEpisode
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEpisode(EpisodeCreateModel model)
         {
-            if(!ModelState.IsValid) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest();
             var season = await _context.Seasons.FindAsync(model.seasonid);
             if(season is null) return BadRequest();
 
@@ -208,21 +226,6 @@ namespace Dawe.Controllers
             return RedirectToAction(nameof(Edit), new { id = season.Series.Id });
         }
 
-        // GET: /Series/EditEpisode
-        public IActionResult EditEpisode(int? id)
-        {
-            if(id == null) return BadRequest();
-            var episode = _context.Episodes.Find((int)id);
-            if(episode is null) return BadRequest();
-            var model = new EpisodeEditModel()
-            {
-                id = (int)id,
-                Name = episode.name,
-                EpisodeNumber = episode.episodeNumber
-            };
-            return View(model);
-        }
-
         // POST: /Series/EditEpisode
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -236,7 +239,7 @@ namespace Dawe.Controllers
 
             _context.Episodes.Update(episode);
             _ = _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return Ok();
         }
 
         // POST: /Series/DeleteEpisode

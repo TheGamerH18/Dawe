@@ -23,19 +23,24 @@
     </div>
 </div>
 
-<div id="EpisodeModal" class="modal fade" tabindex="-1" aria-labelledby="removeseason" aria-hidden="true">
-    <div class="modal-dialog">
+<div id="EpisodeModal" class="modal fade" tabindex="-1" aria-labelledby="EpisodeModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title"></h5>
                 <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p></p>
-                <span hidden></span>
+                <input type="number" id="episodeNumber" class="form-control" disabled />
+                <input type="text" id="episodeText" class="form-control" disabled />
+                <p id="cEpisode" hidden></p>
             </div>
-            <div class="btn btn-primary">Edit Episode</div>
-            <div class="btn btn-danger">Delete Episode</div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="episodeConfirm" onclick="confirmEdit()" disabled>Confirm</button>
+                <button class="btn btn-primary" id="episodeEdit" onclick="startEdit()">Edit Episode</button>
+                <button class="btn btn-danger" onclick="deleteActiveEpisode()">Delete Episode</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
         </div>
     </div>
 </div>
@@ -115,7 +120,7 @@
                     <tbody>
                         @foreach(var episode in season.Episodes)
                         {
-                            <tr style="cursor: pointer;" onclick="window.location.href = '/Series/WatchEpisode/@episode.episodeId'">
+                            <tr style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#EpisodeModal" data-bs-episode="@episode.episodeId">
                                 <th scope="row">@Html.DisplayFor(number => episode.episodeNumber)</th>
                                 <td>@Html.DisplayFor(number => episode.name)</td>
                             </tr>
@@ -137,6 +142,8 @@
     <script>
         const token = $('input[name="__RequestVerificationToken"]').val();
         const seasonModal = document.getElementById("SeasonModal");
+        const episodeModal = document.getElementById("EpisodeModal");
+        
         seasonModal.addEventListener("show.bs.modal", event => {
             const button = event.relatedTarget
             const season = button.getAttribute("data-bs-season")
@@ -147,6 +154,38 @@
 
             textobject.textContent = `Are you sure to delete Season ${season}?`
             idobject.textContent = seasonid
+        });
+
+        episodeModal.addEventListener("show.bs.modal", event => {
+            const button = event.relatedTarget;
+            const episodeid = button.getAttribute("data-bs-episode");
+
+            const idobject = episodeModal.querySelector(".modal-body #cEpisode");
+            const numberobject = episodeModal.querySelector(".modal-body #episodeNumber");
+            const textobject = episodeModal.querySelector(".modal-body #episodeText");
+
+            $.ajax({
+                url: "/Series/GetEpisode",
+                type: "GET",
+                data: {
+                    "id": episodeid,
+                },
+                success: function(data) {
+                    idobject.textContent = data.id;
+                    numberobject.value = data.episodeNumber;
+                    textobject.value = data.name;
+                }
+            });
+        });
+
+        episodeModal.addEventListener("hidden.bs.modal", event => {
+            const numberobject = episodeModal.querySelector(".modal-body #episodeNumber");
+            const textobject = episodeModal.querySelector(".modal-body #episodeText");
+            const confirmbtn = episodeModal.querySelector(".modal-footer #episodeConfirm");
+
+            numberobject.disabled = true;
+            textobject.disabled = true;
+            confirmbtn.disabled = true;
         });
 
         function hideelements() {
@@ -171,7 +210,8 @@
         function showseason(seasonnumber) {
             hideelements();
             var table = document.getElementById("season-"+seasonnumber);
-            table.hidden=false
+            if(table == null) return;
+            table.hidden=false;
         }
 
         function deleteSeason() {
@@ -188,5 +228,39 @@
                 }
             });
         }
+
+        function startEdit() {
+            const numberobject = episodeModal.querySelector(".modal-body #episodeNumber");
+            const textobject = episodeModal.querySelector(".modal-body #episodeText");
+            const confirmbtn = episodeModal.querySelector(".modal-footer #episodeConfirm");
+
+            numberobject.disabled = false;
+            textobject.disabled = false;
+            confirmbtn.disabled = false;
+        }
+
+        function confirmEdit() {
+            const idobject = episodeModal.querySelector(".modal-body #cEpisode");
+            const numberobject = episodeModal.querySelector(".modal-body #episodeNumber");
+            const textobject = episodeModal.querySelector(".modal-body #episodeText");
+
+            $.ajax({
+                url: "/Series/EditEpisode",
+                type: "POST",
+                data: {
+                    "__RequestVerificationToken": token,
+                    "id": idobject.textContent,
+                    "name": textobject.value,
+                    "episodeNumber": numberobject.value,
+                },
+                success: function() {
+                    document.location.reload();
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            showseason(1)
+        });
     </script>
 }

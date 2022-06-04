@@ -46,6 +46,10 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script>
+        window.onbeforeunload = function(event) {
+            return confirm("Confirm Refresh")
+        }
+
         function uploadFiles(inputId) {
             var input  = document.getElementById(inputId);
             var files = input.files;
