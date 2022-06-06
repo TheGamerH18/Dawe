@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Dawe.Data;
 using Dawe.Models;
-using Dawe.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
 
 namespace Dawe.Controllers
 {
@@ -18,11 +17,11 @@ namespace Dawe.Controllers
         {
             if (id is null) return BadRequest();
             var file = await _context.Files.FindAsync(id);
-            if(file is null) return NotFound();
+            if (file is null) return NotFound();
             var path = IFileHelper.GetPathAndFilename(file.Path, _environment.WebRootPath);
             var content = System.IO.File.OpenRead(path);
 
-            
+
             return File(content, DataValidation.GetEnumDescription(file.Type));
         }
 
@@ -85,14 +84,14 @@ namespace Dawe.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
-            if(id is null) return BadRequest();
+            if (id is null) return BadRequest();
             var file = await getFile((int)id);
-            if(file is null) return NoContent();
+            if (file is null) return NoContent();
 
             var dic = new Dictionary<string, string>();
             dic.Add("Id", file.Id.ToString());
             dic.Add("Name", file.Name);
-            if(file.Category is null) dic.Add("Category", null);
+            if (file.Category is null) dic.Add("Category", null);
             else dic.Add("Category", file.Category.Name);
             dic.Add("Type", file.Type.ToString());
             return Ok(dic);
@@ -101,7 +100,7 @@ namespace Dawe.Controllers
         [HttpGet]
         public async Task<IActionResult> EditFile(int? id)
         {
-            if(id is null) return BadRequest();
+            if (id is null) return BadRequest();
             var file = await getFile((int)id);
             if (file == null || file.Category == null) return NoContent();
 
@@ -122,7 +121,7 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditFile(FileEditModel editModel)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 Response.StatusCode = 500;
                 return Json("Modalstate is invalid");
@@ -154,7 +153,7 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteFile(int? id)
         {
-            if(id is null) return BadRequest();
+            if (id is null) return BadRequest();
             var file = await _context.Files.FindAsync(id);
             if (file is null) return NotFound();
 
@@ -174,7 +173,7 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile files)
         {
-            if(files is null) return BadRequest();
+            if (files is null) return BadRequest();
             // Validate Extension
             var extension = Path.GetExtension(files.FileName);
             if (extension is null) return BadRequest();

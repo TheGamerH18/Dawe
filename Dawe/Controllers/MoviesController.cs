@@ -1,18 +1,18 @@
 ﻿#nullable disable
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Dawe.Data;
 using Dawe.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-using Dawe.Data;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Dawe.Controllers
 {
     public class MoviesController : Controller
     {
         private readonly Data.DataContext _context;
-        private readonly IWebHostEnvironment _hostingEnvironment; 
+        private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly ILogger<MoviesController> _logger;
 
         public MoviesController(Data.DataContext context, IWebHostEnvironment hostingEnvironment, ILogger<MoviesController> logger)
@@ -49,7 +49,7 @@ namespace Dawe.Controllers
             tags.ForEach(t => model.Categories.Add(new SelectListItem(t.Tag, t.Id.ToString())));
             return View(model);
         }
-        
+
         // POST: /Movies/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -69,7 +69,7 @@ namespace Dawe.Controllers
 
             await _context.Movies.AddAsync(movie);
             _ = _context.SaveChangesAsync();
-            
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -84,7 +84,7 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTag(CreateTagModel model)
         {
-            if(!ModelState.IsValid) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest();
             MovieTag tag = new()
             {
                 Tag = model.Tag,
@@ -99,9 +99,9 @@ namespace Dawe.Controllers
         // GET: /Movies/Movie/Id
         public async Task<IActionResult> Movie(int? id)
         {
-            if(id == null) return BadRequest();
+            if (id == null) return BadRequest();
             var movie = await GetMovie((int)id);
-            if(movie == null) return NotFound();
+            if (movie == null) return NotFound();
             var path = IFileHelper.GetPathAndFilename(movie.MoviePath, _hostingEnvironment.WebRootPath);
             var content = System.IO.File.OpenRead(path);
 
@@ -138,13 +138,13 @@ namespace Dawe.Controllers
         // GET: Movies/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if(id == null) return BadRequest();
-            
+            if (id == null) return BadRequest();
+
             var movie = await _context.Movies.FindAsync(id);
             if (movie == null) return NotFound();
 
             var tags = await _context.MovieTag.ToListAsync();
-            
+
             EditModel model = new()
             {
                 id = movie.Id,
@@ -164,11 +164,11 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditModel model)
         {
-            if(!ModelState.IsValid) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest();
             var movie = await _context.Movies.FindAsync(model.id);
             if (movie == null) return BadRequest();
 
-            if(model.CoverFile != null)
+            if (model.CoverFile != null)
             {
                 movie.Cover = ConvertCover(model.CoverFile);
             }
@@ -236,14 +236,15 @@ namespace Dawe.Controllers
         /// </summary>
         /// <param name="Cover">IFormFile, that is supossed to be converted</param>
         /// <returns>Converted byte array</returns>
-        private byte[] ConvertCover (IFormFile Cover)
+        private byte[] ConvertCover(IFormFile Cover)
         {
             Image img;
-            if(Cover == null)
+            if (Cover == null)
             {
                 // Load placeholder image
                 img = Image.Load(Path.Combine(Environment.CurrentDirectory, @"ressources\movieplaceholder.png"));
-            } else
+            }
+            else
             {
                 // Load Specified Image and resize
                 img = Image.Load(Cover.OpenReadStream());
@@ -255,7 +256,7 @@ namespace Dawe.Controllers
             }
             // Copy Image to array
             using MemoryStream memoryStream = new MemoryStream();
-                img.SaveAsPng(memoryStream);
+            img.SaveAsPng(memoryStream);
             return memoryStream.ToArray();
         }
 

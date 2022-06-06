@@ -41,7 +41,7 @@
         /// <returns>True, the file is deleted successfully</returns>
         public static bool DeleteFile(string filename, string WebRootPath)
         {
-            if(FileExists(filename, WebRootPath))
+            if (FileExists(filename, WebRootPath))
             {
                 var path = GetPathAndFilename(filename, WebRootPath);
                 File.Delete(path);

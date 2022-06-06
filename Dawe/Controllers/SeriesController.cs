@@ -20,7 +20,7 @@ namespace Dawe.Controllers
             _environment = environment;
             _logger = logger;
         }
- 
+
         public async Task<IActionResult> Index()
         {
             var shows = await _context.Series.ToListAsync();
@@ -95,7 +95,7 @@ namespace Dawe.Controllers
             var show = await GetShow((int)id);
             if (show == null) return BadRequest();
             var tags = await _context.SeriesTag.ToListAsync();
-            
+
             var model = new EditModel()
             {
                 Coverbyte = show.Thumbnail,
@@ -117,7 +117,7 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int? id)
         {
-            if(id is null) return BadRequest();
+            if (id is null) return BadRequest();
             var series = await GetShow((int)id);
             if (series is null) return NotFound();
 
@@ -136,7 +136,7 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddSeason(int? id)
         {
-            if(id is null) return BadRequest();
+            if (id is null) return BadRequest();
             var series = await GetShow((int)id);
             if (series == null) return BadRequest();
 
@@ -157,9 +157,9 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveSeason(int? id)
         {
-            if(id is null) return BadRequest();
+            if (id is null) return BadRequest();
             var season = await _context.Seasons.FindAsync(id);
-            if(season is null) return BadRequest();
+            if (season is null) return BadRequest();
 
             _context.Episodes.Where(x => x.season == season).ToListAsync().Result.ForEach(x =>
             {
@@ -175,7 +175,7 @@ namespace Dawe.Controllers
         // GET: /Series/AddEpisode/id
         public IActionResult AddEpisode(int? id)
         {
-            if(id == null) return BadRequest();
+            if (id == null) return BadRequest();
             var episodesofshow = _context.Episodes.Where(x => x.season.Id == (int)id).ToList();
             int cnumber = episodesofshow.Count() + 1;
             EpisodeCreateModel model = new()
@@ -211,7 +211,7 @@ namespace Dawe.Controllers
         {
             if (!ModelState.IsValid) return BadRequest();
             var season = await _context.Seasons.FindAsync(model.seasonid);
-            if(season is null) return BadRequest();
+            if (season is null) return BadRequest();
 
             Episode episode = new()
             {
@@ -247,9 +247,9 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteEpisode(int? id)
         {
-            if(id is null) return BadRequest();
+            if (id is null) return BadRequest();
             var episode = await _context.Episodes.FindAsync(id);
-            if(episode is null) return NotFound();
+            if (episode is null) return NotFound();
 
             IFileHelper.DeleteFile(episode.EpisodePath, _environment.WebRootPath);
             _context.Remove(episode);
@@ -291,7 +291,7 @@ namespace Dawe.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile files)
         {
-            if(files is null) return BadRequest();
+            if (files is null) return BadRequest();
             // Validate Extension
             if (!Data.DataValidation.Checkextension(Path.GetExtension(files.FileName)))
             {
@@ -312,13 +312,13 @@ namespace Dawe.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
-            if(id != null)
+            if (id != null)
             {
                 var show = await GetShow((int)id);
-                if(show != null)
+                if (show != null)
                 {
                     return View(show);
-                } 
+                }
                 else
                 {
                     return NotFound();
@@ -329,7 +329,7 @@ namespace Dawe.Controllers
 
         public async Task<Series?> GetShow(int id)
         {
-            if(_context.Series.Any(m => m.Id == id))
+            if (_context.Series.Any(m => m.Id == id))
             {
                 // Get basic series
                 var show = await _context.Series.FindAsync(id);
@@ -350,7 +350,7 @@ namespace Dawe.Controllers
                     var episodes = await _context.Episodes.OrderBy(x => x.episodeNumber).ToListAsync();
                     episodes.ForEach(y =>
                     {
-                        if(y.season.Id == x.Id)
+                        if (y.season.Id == x.Id)
                         {
                             x.Episodes.Add(y);
                         }
@@ -383,7 +383,7 @@ namespace Dawe.Controllers
             }
             // Copy Image to array
             using MemoryStream memoryStream = new MemoryStream();
-                img.SaveAsPng(memoryStream);
+            img.SaveAsPng(memoryStream);
             return memoryStream.ToArray();
         }
 

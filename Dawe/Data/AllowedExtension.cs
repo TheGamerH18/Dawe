@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Reflection;
 
 namespace Dawe.Data
@@ -35,19 +33,19 @@ namespace Dawe.Data
 
         [Description("video/mp4")]
         MP4,
-        
+
         [Description("audio/mpeg")]
         MP3,
-        
+
         [Description("audio/x-wav")]
         WAV,
 
         [Description("application/zip")]
         ZIP,
-        
+
         [Description("application/pdf")]
         PDF,
-        
+
         [Description("application/octet-stream")]
         ISO,
 

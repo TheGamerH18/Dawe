@@ -1,7 +1,4 @@
-﻿using SixLabors.ImageSharp;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Dawe.Models
 {
